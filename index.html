@@ -594,9 +594,9 @@
                 }
 
                 const avgGlucose = Math.round(glucoseLogs.reduce((a, b) => a + b.rawData.value, 0) / glucoseLogs.length); const estimatedHba1c = ((avgGlucose + 46.7) / 28.7).toFixed(1); let lows = 0, inRange = 0, highs = 0;
-                glucoseLogs.forEach(log => { const val = log.rawData.value; if (val < 70) lows++; else if (val <= 180) inRange++; else highs++; });
+                glucoseLogs.forEach(log => { const val = log.rawData.value; if (val < 70) lows++; else if (val <= 140) inRange++; else highs++; });
                 const total = glucoseLogs.length; const inRangePercent = total > 0 ? ((inRange / total) * 100).toFixed(0) : 0; const lowsPercent = total > 0 ? ((lows / total) * 100).toFixed(0) : 0; const highsPercent = total > 0 ? ((highs / total) * 100).toFixed(0) : 0;
-                const statsHtml = `<div class="space-y-4"> <div class="glass-effect p-4 rounded-2xl"> <h3 class="font-bold screen-title mb-2">Resumo Geral</h3> <div class="flex justify-around text-center"> <div> <p class="text-2xl font-bold screen-title">${avgGlucose}</p> <p class="text-xs screen-subtitle">Glicemia Média</p> </div> <div> <p class="text-2xl font-bold screen-title">${estimatedHba1c}%</p> <p class="text-xs screen-subtitle">HbA1c Estimada</p> </div> </div> </div> <div class="glass-effect p-4 rounded-2xl"> <h3 class="font-bold screen-title mb-3">Tempo no Alvo (TIR)</h3> <div class="space-y-3"> <div> <p class="text-xs text-green-700 dark:text-green-300 font-semibold mb-1">No Alvo (70-180 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-green-500 h-4 rounded-full" style="width: ${inRangePercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${inRangePercent}%</span></div> </div> <div> <p class="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">Baixa (< 70 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-red-500 h-4 rounded-full" style="width: ${lowsPercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${lowsPercent}%</span></div> </div> <div> <p class="text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">Alta (> 180 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-yellow-500 h-4 rounded-full" style="width: ${highsPercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${highsPercent}%</span></div> </div> </div> </div> </div>`;
+                const statsHtml = `<div class="space-y-4"> <div class="glass-effect p-4 rounded-2xl"> <h3 class="font-bold screen-title mb-2">Resumo Geral</h3> <div class="flex justify-around text-center"> <div> <p class="text-2xl font-bold screen-title">${avgGlucose}</p> <p class="text-xs screen-subtitle">Glicemia Média</p> </div> <div> <p class="text-2xl font-bold screen-title">${estimatedHba1c}%</p> <p class="text-xs screen-subtitle">HbA1c Estimada</p> </div> </div> </div> <div class="glass-effect p-4 rounded-2xl"> <h3 class="font-bold screen-title mb-3">Tempo no Alvo (TIR)</h3> <div class="space-y-3"> <div> <p class="text-xs text-green-700 dark:text-green-300 font-semibold mb-1">No Alvo (70-140 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-green-500 h-4 rounded-full" style="width: ${inRangePercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${inRangePercent}%</span></div> </div> <div> <p class="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">Baixa (< 70 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-red-500 h-4 rounded-full" style="width: ${lowsPercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${lowsPercent}%</span></div> </div> <div> <p class="text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">Alta (> 140 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-yellow-500 h-4 rounded-full" style="width: ${highsPercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${highsPercent}%</span></div> </div> </div> </div> </div>`;
                 reportContent.innerHTML = statsHtml;
                 renderGlucoseByPeriodChart(period);
                 renderHypoReport(period);
@@ -998,7 +998,7 @@
 
                 const glucoseLogs = appState.logHistory.filter(e => e.type === 'glucose' && new Date(e.timestamp) >= startDate);
                 let lows = 0, inRange = 0, highs = 0;
-                glucoseLogs.forEach(log => { const val = log.rawData.value; if (val < 70) lows++; else if (val <= 180) inRange++; else highs++; });
+                glucoseLogs.forEach(log => { const val = log.rawData.value; if (val < 70) lows++; else if (val <= 140) inRange++; else highs++; });
                 const total = lows + inRange + highs;
                 
                 if (total === 0) {
@@ -1009,7 +1009,7 @@
                     return;
                 }
 
-                activeCharts.analysis = new Chart(ctx, { type: 'doughnut', data: { labels: [`Baixa (<70)`, `No Alvo (70-180)`, `Alta (>180)`], datasets: [{ data: [lows, inRange, highs], backgroundColor: ['#ef4444', '#22c55e', '#f59e0b'], borderWidth: 0 }]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } let value = context.raw; let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0; return `${label} ${value} leituras (${percentage}%)`; } } } } }});
+                activeCharts.analysis = new Chart(ctx, { type: 'doughnut', data: { labels: [`Baixa (<70)`, `No Alvo (70-140)`, `Alta (>140)`], datasets: [{ data: [lows, inRange, highs], backgroundColor: ['#ef4444', '#22c55e', '#f59e0b'], borderWidth: 0 }]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } let value = context.raw; let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0; return `${label} ${value} leituras (${percentage}%)`; } } } } }});
             }
             
             async function createChartImage(config, width = 600, height = 300) {
@@ -1050,13 +1050,13 @@
                 glucoseLogs.forEach(log => {
                     const val = log.rawData.value;
                     if (val < 70) lows++;
-                    else if (val <= 180) inRange++;
+                    else if (val <= 140) inRange++;
                     else highs++;
                 });
                 const total = glucoseLogs.length;
                 const inRangePercent = total > 0 ? ((inRange / total) * 100).toFixed(0) : 0;
 
-                const dataSummary = `- Período: ${startDate.toLocaleDateString('pt-BR')} a ${endDate.toLocaleDateString('pt-BR')}\n- Glicemia Média: ${avgGlucose} mg/dL\n- Leituras no Alvo (70-180 mg/dL): ${inRangePercent}%\n- Eventos de Hipoglicemia (<70 mg/dL): ${lows}\n- Eventos de Hiperglicemia (>180 mg/dL): ${highs}`;
+                const dataSummary = `- Período: ${startDate.toLocaleDateString('pt-BR')} a ${endDate.toLocaleDateString('pt-BR')}\n- Glicemia Média: ${avgGlucose} mg/dL\n- Leituras no Alvo (70-140 mg/dL): ${inRangePercent}%\n- Eventos de Hipoglicemia (<70 mg/dL): ${lows}\n- Eventos de Hiperglicemia (>140 mg/dL): ${highs}`;
 
                 const prompt = `Você é um assistente de saúde especializado em diabetes. Analise o seguinte resumo de dados de um usuário e gere um relatório em português do Brasil. O relatório deve ser encorajador e fácil de entender. NÃO forneça conselhos médicos diretos, sempre sugira consultar um profissional de saúde. O relatório deve ter as seguintes seções, cada uma com um título em negrito: 1. **Resumo Geral:** Uma breve visão geral dos resultados. 2. **Pontos Positivos:** Elogie as tendências boas. 3. **Áreas de Foco:** Aponte áreas para melhoria de forma construtiva. 4. **Conclusão e Próximos Passos:** Uma mensagem final de incentivo. Aqui estão os dados:\n${dataSummary}`;
 
@@ -1730,6 +1730,7 @@
     </script>
 </body>
 </html>
+
 
 
 
