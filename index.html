@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DaniloTh3dAn para diabéticos</title>
+    
+    <!-- PWA & Mobile Experience Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DaniloTh3dAn">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/7c3aed/ffffff?text=D">
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22short_name%22%3A%22Diabetes%20App%22%2C%22name%22%3A%22DaniloTh3dAn%20para%20diab%C3%A9ticos%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2F7c3aed%2Fffffff%3Ftext%3DD%22%2C%22type%22%3A%22image%2Fpng%22%2C%22sizes%22%3A%22192x192%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2F7c3aed%2Fffffff%3Ftext%3DD%22%2C%22type%22%3A%22image%2Fpng%22%2C%22sizes%22%3A%22512x512%22%7D%5D%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22theme_color%22%3A%22%237c3aed%22%2C%22background_color%22%3A%22%23111827%22%7D">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://rsms.me/"><link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    
+    <!-- Estilos do Novo Design "Liquid Glass" -->
+    <style>
+        :root {
+            --bg-start-light: #f3e8ff;
+            --bg-end-light: #d8b4fe;
+            --bg-start-dark: #1e1b4b;
+            --bg-end-dark: #000000;
+            --primary-text-light: #1f2937;
+            --primary-text-dark: #f9fafb;
+            --secondary-text-light: #4b5563;
+            --secondary-text-dark: #d1d5db;
+            --accent-color: #8b5cf6;
+            --accent-color-hover: #7c3aed;
+            --glass-bg-light: rgba(255, 255, 255, 0.5);
+            --glass-bg-dark: rgba(30, 30, 45, 0.5);
+            --glass-border-light: rgba(255, 255, 255, 0.7);
+            --glass-border-dark: rgba(255, 255, 255, 0.2);
+            --blur-amount: 25px;
+            --shadow-light: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --shadow-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --border-radius-main: 36px;
+            --border-radius-inner: 18px;
+        }
+
+        /* --- Fundo Animado --- */
+        #background-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; background: linear-gradient(135deg, var(--bg-start-light), var(--bg-end-light)); transition: background 0.5s ease-in-out; }
+        html.dark #background-container { background: linear-gradient(135deg, var(--bg-start-dark), var(--bg-end-dark)); }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; }
+        .blob1 { width: 400px; height: 400px; top: -150px; left: -150px; background: #a855f7; animation: move 25s infinite alternate; }
+        .blob2 { width: 300px; height: 300px; bottom: -100px; right: -100px; background: #6366f1; animation: move 30s infinite alternate-reverse; }
+        .blob3 { width: 250px; height: 250px; bottom: 50px; left: -150px; background: #ec4899; animation: move 20s infinite alternate; }
+        @keyframes move { from { transform: translate(0, 0) scale(1); } to { transform: translate(100px, 150px) scale(1.2); } }
+
+        /* --- Estilos Base --- */
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background-color: transparent; overflow: hidden; }
+        
+        /* --- Layout Mobile (Padrão) --- */
+        .phone-container {
+            width: 100dvw;
+            height: 100dvh;
+            max-width: 430px;
+            margin: 0 auto;
+            position: relative;
+            background: transparent;
+            box-shadow: none;
+            overflow: hidden;
+            border-radius: 32px;
+        }
+
+        #main-content::-webkit-scrollbar { display: none; }
+        #main-content { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .status-bar { color: var(--primary-text-light); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 600; z-index: 10; position: relative; padding-top: env(safe-area-inset-top, 0); }
+        html.dark .status-bar { color: var(--primary-text-dark); }
+        
+        .glass-effect { background: var(--glass-bg-light); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--glass-border-light); box-shadow: var(--shadow-light); transition: background 0.3s, border 0.3s; }
+        html.dark .glass-effect { background: var(--glass-bg-dark); border: 1px solid var(--glass-border-dark); box-shadow: var(--shadow-dark); }
+
+        .floating-nav-container nav { border-radius: 50px; padding: 8px; width: 100%; max-w-sm; }
+        .nav-item { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item i { color: var(--secondary-text-light); transition: all 0.3s ease; }
+        html.dark .nav-item i { color: var(--secondary-text-dark); }
+        .nav-item.active i { color: var(--accent-color); transform: translateY(-4px) scale(1.1); }
+        html.dark .nav-item.active i { color: #c4b5fd; }
+        .nav-item:not(.active):hover i { transform: scale(1.1); }
+        .nav-text { display: none; }
+
+        #log-button { background: linear-gradient(135deg, var(--accent-color), #a855f7); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5); transition: all 0.3s ease; }
+        #log-button:hover { transform: scale(1.1) rotate(90deg); }
+
+        .detail-modal, .modal-box, .modal-content { border-radius: var(--border-radius-main); }
+        #app-container, #login-screen .phone-container, #setup-screen { border-radius: 32px; }
+        #login-screen, #setup-screen { background-color: rgba(249, 250, 251, 0.5); }
+        html.dark #login-screen, html.dark #setup-screen { background-color: rgba(17, 24, 39, 0.5); }
+
+        .screen-title { color: var(--primary-text-light); text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        html.dark .screen-title { color: var(--primary-text-dark); }
+        .screen-subtitle { color: var(--secondary-text-light); }
+        html.dark .screen-subtitle { color: var(--secondary-text-dark); }
+        .logbook-date-header { background: var(--glass-bg-light); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        html.dark .logbook-date-header { background: var(--glass-bg-dark); }
+
+        .glucose-circle { width: 160px; height: 160px; border-width: 10px; background: var(--glass-bg-light); border-color: var(--accent-color); box-shadow: var(--shadow-light); color: var(--primary-text-light); }
+        html.dark .glucose-circle { background: var(--glass-bg-dark); border-color: var(--accent-color); box-shadow: var(--shadow-dark); color: var(--primary-text-dark); }
+        .glucose-circle-low { border-color: #ef4444; color: #ef4444; }
+        .glucose-circle-high { border-color: #f59e0b; color: #f59e0b; }
+
+        .detail-modal { 
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateY(100%); 
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            background: var(--glass-bg-light); 
+            backdrop-filter: blur(var(--blur-amount)); 
+            -webkit-backdrop-filter: blur(var(--blur-amount)); 
+            border-top: 1px solid var(--glass-border-light); 
+            border-radius: var(--border-radius-main) var(--border-radius-main) 0 0; 
+            display: none; /* Hidden by default */
+        }
+        .detail-modal.open { 
+            transform: translateY(0); 
+            display: flex; /* Shown when open */
+        }
+        html.dark .detail-modal { background: var(--glass-bg-dark); border-top: 1px solid var(--glass-border-dark); }
+        .detail-modal > header, .detail-modal > footer { background: transparent !important; border-color: var(--glass-border-light) !important; flex-shrink: 0; }
+        html.dark .detail-modal > header, html.dark .detail-modal > footer { border-color: var(--glass-border-dark) !important; }
+        .detail-modal > header { padding-top: calc(1rem + env(safe-area-inset-top, 0)); }
+
+        #bolus-calculator-modal, #report-date-modal, #log-modal { background-color: rgba(0, 0, 0, 0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        input, select, textarea { background: rgba(255, 255, 255, 0.3) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: var(--primary-text-light) !important; border-radius: 12px !important; }
+        html.dark input, html.dark select, html.dark textarea { background: rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: var(--primary-text-dark) !important; }
+        input::placeholder, textarea::placeholder { color: var(--secondary-text-light) !important; opacity: 0.7; }
+        html.dark input::placeholder, html.dark textarea::placeholder { color: var(--secondary-text-dark) !important; opacity: 0.7; }
+        
+        .primary-btn { background: var(--accent-color) !important; color: white !important; border-radius: 14px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden;}
+        .primary-btn:hover { background: var(--accent-color-hover) !important; transform: translateY(-2px); }
+        .btn-content { transition: opacity 0.2s ease-in-out; }
+        .btn-loader, .btn-success { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.2s ease-in-out; }
+        .primary-btn.loading .btn-content, .primary-btn.success .btn-content { opacity: 0; }
+        .primary-btn.loading .btn-loader, .primary-btn.success .btn-success { opacity: 1; }
+        .btn-loader { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.5); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        .slider-track { background-color: rgba(0,0,0,0.1); }
+        .slider-thumb { background-color: var(--accent-color); width: 28px; height: 28px; }
+        .slider-value-display { color: var(--primary-text-light); text-shadow: 0 2px 5px rgba(0,0,0,0.1); background: transparent; border: none; text-align: center; width: 150px; font-size: 2.25rem; line-height: 2.5rem; outline: none; padding: 0; }
+        html.dark .slider-value-display { color: var(--primary-text-dark); }
+        
+        .loader { width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.3); border-bottom-color: var(--accent-color); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #main-content > div { padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0rem)) !important; }
+        .floating-nav-container { bottom: calc(1rem + env(safe-area-inset-bottom, 0rem)); }
+        #log-button { bottom: calc(7rem + env(safe-area-inset-bottom, 0rem)); }
+        #toast { bottom: calc(6rem + env(safe-area-inset-bottom, 0rem)); border-radius: 50px; background: var(--glass-bg-dark); border: 1px solid var(--glass-border-dark); backdrop-filter: blur(10px); color: white; }
+
+        .theme-switch { display: inline-block; height: 26px; position: relative; width: 50px; }
+        .theme-switch input { display:none; }
+        .slider { background-color: rgba(0,0,0,0.2); bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; }
+        .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 18px; left: 4px; position: absolute; transition: .4s; width: 18px; }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+
+        #log-button, .floating-nav-container { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #log-button.hidden, .floating-nav-container.hidden { transform: translateY(150px); }
+        
+        .period-btn { transition: all 0.2s ease-in-out; }
+        .active-period-btn { background-color: white; color: var(--accent-color); box-shadow: 0 2px 10px rgba(0,0,0,0.1); transform: scale(1.05); }
+        html.dark .active-period-btn { background-color: var(--accent-color); color: white; }
+        .inactive-period-btn { background-color: transparent; color: var(--secondary-text-light); }
+        html.dark .inactive-period-btn { color: var(--secondary-text-dark); }
+        
+        #detail-modals-container {
+            display: none;
+        }
+
+        #detail-modals-container.active {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            pointer-events: auto;
+        }
+
+        /* --- Layout Desktop (Telas Maiores) --- */
+        @media (min-width: 1024px) {
+            #detail-modals-container.active {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .phone-container {
+                max-width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                display: flex;
+                flex-direction: row;
+            }
+            .floating-nav-container, #log-button, .status-bar {
+                display: none;
+            }
+            #main-content {
+                height: 100vh;
+                flex-grow: 1;
+            }
+            .detail-modal {
+                /* Reset mobile slide-up behavior */
+                transform: scale(0.95);
+                opacity: 0;
+                transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+
+                /* Make it a flex item for centering */
+                position: relative; 
+                
+                /* Override mobile absolute positioning */
+                inset: auto;
+                height: auto;
+                
+                /* Desktop-specific sizing and appearance */
+                border-radius: var(--border-radius-main);
+                border: 1px solid var(--glass-border-light);
+                max-width: 500px;
+                width: 90%;
+                max-height: 90vh;
+            }
+            html.dark .detail-modal {
+                border: 1px solid var(--glass-border-dark);
+            }
+            .detail-modal.open {
+                transform: scale(1);
+                opacity: 1;
+                display: flex; /* This is crucial for visibility and layout */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    
+    <!-- Fundo Líquido Animado -->
+    <div id="background-container">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+    </div>
+
+    <!-- Ecrã de Configuração e Erros -->
+    <div id="setup-screen" class="phone-container text-gray-800 dark:text-gray-200 flex-col items-center justify-center p-6 text-center z-50 hidden overflow-y-auto glass-effect absolute inset-0">
+        <h1 class="text-2xl font-bold text-red-500 mb-4">Ação Necessária</h1>
+        <div id="setup-content" class="text-left text-sm space-y-4"></div>
+        <button id="retry-button" class="mt-6 w-full text-white font-bold py-3 px-4 transition primary-btn">Tentar Novamente</button>
+    </div>
+
+    <!-- Tela de Login / Carregamento -->
+    <div id="login-screen" class="absolute inset-0 z-40 transition-opacity duration-300">
+        <div class="phone-container flex flex-col items-center justify-center p-8 text-center glass-effect">
+            <h1 class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2 screen-title">DaniloTh3dAn<br><span class="text-xl font-normal screen-subtitle">para diabéticos</span></h1>
+            <div id="auth-screen" class="w-full hidden">
+                <p class="screen-subtitle mb-6">Escolha um método para entrar e salvar os seus dados na nuvem.</p>
+                <button id="google-login-button" class="w-full font-semibold py-3 px-4 rounded-2xl transition flex items-center justify-center shadow-sm glass-effect hover:bg-white/20 dark:hover:bg-white/10">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="[Logo do Google]" class="h-6 w-6 mr-3">
+                    <span class="screen-title">Entrar com Google</span>
+                </button>
+                 <button id="anon-login-button" class="mt-4 text-sm screen-subtitle hover:text-purple-600 dark:hover:text-purple-400">Continuar sem conta</button>
+            </div>
+            <div id="loading-content" class=""><div class="loader mt-8"></div><p class="screen-subtitle mt-4">Carregando...</p></div>
+        </div>
+    </div>
+
+
+    <!-- Container Principal da Aplicação -->
+    <div id="app-container" class="phone-container overflow-hidden hidden z-30">
+        <!-- Navegação Sidebar para Desktop -->
+        <nav class="hidden lg:flex flex-col w-64 h-full glass-effect border-r border-white/10 p-4 flex-shrink-0">
+            <h1 class="text-2xl font-bold screen-title px-2 pb-8">DaniloTh3dAn</h1>
+            <div class="nav-item active" data-screen="dashboard"><i class="fas fa-th-large w-8"></i><span class="nav-text">Dashboard</span></div>
+            <div class="nav-item" data-screen="history"><i class="fas fa-history w-8"></i><span class="nav-text">Diário</span></div>
+            <div class="nav-item" data-screen="goals"><i class="fas fa-star w-8"></i><span class="nav-text">Metas</span></div>
+            <div class="nav-item" data-screen="reports"><i class="fas fa-file-alt w-8"></i><span class="nav-text">Relatórios</span></div>
+            <div class="nav-item" data-screen="analysis"><i class="fas fa-chart-pie w-8"></i><span class="nav-text">Análise</span></div>
+            <div class="nav-item" data-screen="profile"><i class="fas fa-user-cog w-8"></i><span class="nav-text">Perfil</span></div>
+            <button id="desktop-log-button" class="w-full primary-btn font-bold py-3 px-4 mt-auto flex items-center justify-center">
+                <i class="fas fa-plus mr-2"></i>Registrar Entrada
+            </button>
+        </nav>
+
+        <div class="w-full h-full flex flex-col flex-grow">
+            <!-- Barra de Status (Apenas Mobile) -->
+            <div class="status-bar lg:hidden"><span id="time">11:50</span><div class="flex items-center space-x-1"><i class="fas fa-signal"></i><i class="fas fa-wifi"></i><i class="fas fa-battery-full"></i></div></div>
+            <!-- Área de Conteúdo Principal -->
+            <main id="main-content" class="flex-1 overflow-y-auto"></main>
+        </div>
+
+        <!-- Botão de Ação Flutuante (Apenas Mobile) -->
+        <button id="log-button" class="absolute right-6 bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20 lg:hidden"><i class="fas fa-plus text-2xl"></i></button>
+
+        <!-- Container da Barra de Navegação Flutuante (Apenas Mobile) -->
+        <div class="floating-nav-container absolute left-4 right-4 z-10 flex justify-center lg:hidden">
+             <nav class="glass-effect flex items-center justify-around">
+                <div class="nav-item relative text-center cursor-pointer flex-1 flex justify-center items-center h-12 active" data-screen="dashboard"><i class="fas fa-th-large text-xl z-10"></i></div>
+                <div class="nav-item relative text-center cursor-pointer flex-1 flex justify-center items-center h-12" data-screen="history"><i class="fas fa-history text-xl z-10"></i></div>
+                <div class="nav-item relative text-center cursor-pointer flex-1 flex justify-center items-center h-12" data-screen="goals"><i class="fas fa-star text-xl z-10"></i></div>
+                <div class="nav-item relative text-center cursor-pointer flex-1 flex justify-center items-center h-12" data-screen="reports"><i class="fas fa-file-alt text-xl z-10"></i></div>
+                <div class="nav-item relative text-center cursor-pointer flex-1 flex justify-center items-center h-12" data-screen="analysis"><i class="fas fa-chart-pie text-xl z-10"></i></div>
+                <div class="nav-item relative text-center cursor-pointer flex-1 flex justify-center items-center h-12" data-screen="profile"><i class="fas fa-user-cog text-xl z-10"></i></div>
+            </nav>
+        </div>
+        
+    </div>
+    
+    <!-- Modals de Registro Detalhado -->
+    <div id="detail-modals-container" class="z-40 pointer-events-none">
+        <div id="glucose-modal" class="detail-modal flex-col pointer-events-auto"><header class="p-4 flex items-center border-b"><button class="close-detail-modal-btn text-purple-500 dark:text-purple-400"><i class="fas fa-chevron-left mr-2"></i> Voltar</button><h2 class="text-lg font-bold screen-title mx-auto">Registrar Glicose</h2></header><div class="flex-1 p-6 flex flex-col items-center justify-center overflow-y-auto"><div id="glucose-slider-container" class="slider-container"><input type="number" id="glucose-display-value" class="slider-value-display" value="120"><div class="screen-subtitle mb-4">mg/dL</div><div class="slider-track"><div class="slider-thumb"></div></div></div><div class="mt-8 w-full max-w-xs space-y-4"><label for="glucose-timestamp-input" class="screen-subtitle -mb-3 block text-sm">Data e Hora</label><input type="datetime-local" id="glucose-timestamp-input" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"><label for="glucose-situation-select" class="screen-subtitle -mb-3 block text-sm">Situação</label><select id="glucose-situation-select" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"><option>Geral</option><option>Em Jejum</option><option>Antes do Café da Manhã</option><option>Depois do Café da Manhã</option><option>Antes do Almoço</option><option>Depois do Almoço</option><option>Antes do Jantar</option><option>Depois do Jantar</option><option>Ao Deitar</option><option>De Madrugada</option><option>Antes do Exercício</option><option>Depois do Exercício</option></select><label for="glucose-notes-input" class="screen-subtitle -mb-3 block text-sm">Notas</label><textarea id="glucose-notes-input" placeholder="Ex: Estresse, pós-exercício..." rows="3" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea></div></div><footer class="p-4 border-t"><button class="save-btn w-full font-bold py-3 px-4 primary-btn" data-type="glucose"><span class="btn-content">Salvar Glicose</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button><div id="ai-glucose-insight" class="mt-4 text-xs screen-subtitle text-center p-2 glass-effect rounded-lg hidden"></div></footer></div>
+        <div id="insulin-modal" class="detail-modal flex-col pointer-events-auto"><header class="p-4 flex items-center border-b"><button class="close-detail-modal-btn text-purple-500 dark:text-purple-400"><i class="fas fa-chevron-left mr-2"></i> Voltar</button><h2 class="text-lg font-bold screen-title mx-auto">Registrar Insulina</h2></header><div class="flex-1 p-6 flex flex-col items-center justify-center overflow-y-auto"><div id="insulin-slider-container" class="slider-container"><input type="number" step="0.5" id="insulin-display-value" class="slider-value-display" value="0.0"><div class="screen-subtitle mb-4">unidades</div><div class="slider-track"><div class="slider-thumb"></div></div></div><div class="mt-8 w-full max-w-xs space-y-4"><div class="space-y-2"><label class="screen-subtitle block">Tipo</label><div class="flex space-x-2"><button class="insulin-type-btn flex-1 p-3 border rounded-lg bg-purple-500 text-white border-purple-500" data-type="Bolus (Lispro)">Bolus</button><button class="insulin-type-btn flex-1 p-3 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200" data-type="Basal (Glargina)">Basal</button></div></div><div class="space-y-2"><label for="insulin-timestamp-input" class="screen-subtitle block text-sm">Data e Hora</label><input type="datetime-local" id="insulin-timestamp-input" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div><div class="space-y-2"><label for="insulin-notes-input" class="screen-subtitle block text-sm">Notas</label><textarea id="insulin-notes-input" placeholder="Ex: Novo local de aplicação..." rows="3" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea></div></div></div><footer class="p-4 border-t"><button class="save-btn w-full font-bold py-3 px-4 primary-btn" data-type="insulin"><span class="btn-content">Salvar Insulina</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button><div id="ai-insulin-suggestion" class="mt-4 text-xs screen-subtitle text-center p-2 glass-effect rounded-lg hidden"></div></footer></div>
+        
+        <div id="meal-modal" class="detail-modal flex-col pointer-events-auto"><header class="p-4 flex items-center border-b"><button class="close-detail-modal-btn text-purple-500 dark:text-purple-400"><i class="fas fa-chevron-left mr-2"></i> Voltar</button><h2 class="text-lg font-bold screen-title mx-auto">Registrar Refeição</h2></header><div class="flex-1 p-4 space-y-4 overflow-y-auto"><div class="flex items-center space-x-2"><div class="relative flex-grow"><input type="text" id="food-search-input" placeholder="Descreva sua refeição com IA..." class="w-full p-3 pl-10 focus:ring-2 focus:ring-purple-500 focus:outline-none"><i class="fas fa-magic absolute left-3 top-3.5 text-gray-400"></i></div><button id="photo-meal-btn" class="bg-purple-600 text-white w-12 h-12 rounded-lg flex items-center justify-center shadow-sm hover:bg-purple-700 transition flex-shrink-0"><i class="fas fa-camera text-xl"></i></button></div><div id="ai-photo-analysis-section" class="hidden"></div><div id="search-results"></div><input type="file" id="meal-photo-input" class="hidden" accept="image/*" capture="environment"><div class="grid grid-cols-2 gap-4"><div><label for="meal-timestamp-input" class="screen-subtitle mb-1 block text-sm">Data e Hora</label><input type="datetime-local" id="meal-timestamp-input" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div><div><label for="meal-type-select" class="screen-subtitle mb-1 block text-sm">Tipo</label><select id="meal-type-select" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none h-[54px]"><option>Café da Manhã</option><option>Almoço</option><option>Jantar</option><option>Lanche</option></select></div></div><div id="current-meal-summary" class="glass-effect p-3 rounded-2xl"><h3 class="font-bold screen-title">Itens da Refeição</h3><div id="current-meal-items" class="text-sm screen-subtitle mt-2 max-h-32 overflow-y-auto space-y-1"></div><div class="flex justify-between font-bold text-lg mt-2 border-t dark:border-gray-700 pt-2 screen-title"><span>Total de Carboidratos:</span><span id="total-carbs">0g</span></div></div><div><label for="meal-notes-input" class="screen-subtitle mb-1 block text-sm">Notas</label><textarea id="meal-notes-input" placeholder="Ex: Comi fora, me senti bem..." rows="2" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea></div></div><footer class="p-4 border-t space-y-2"><button class="save-btn w-full font-bold py-3 px-4 primary-btn" data-type="meal"><span class="btn-content">Salvar Refeição</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button></footer></div>
+        <div id="activity-modal" class="detail-modal flex-col pointer-events-auto"><header class="p-4 flex items-center border-b"><button class="close-detail-modal-btn text-purple-500 dark:text-purple-400"><i class="fas fa-chevron-left mr-2"></i> Voltar</button><h2 class="text-lg font-bold screen-title mx-auto">Registrar Atividade</h2></header><div class="flex-1 p-6 flex flex-col items-center justify-center overflow-y-auto"><div id="activity-slider-container" class="slider-container"><input type="number" step="5" id="activity-display-value" class="slider-value-display" value="30"><div class="screen-subtitle mb-4">minutos</div><div class="slider-track"><div class="slider-thumb"></div></div></div><div class="mt-8 w-full max-w-xs space-y-4"><label for="activity-timestamp-input" class="screen-subtitle -mb-3 block text-sm">Data e Hora</label><input type="datetime-local" id="activity-timestamp-input" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"><label for="activity-notes-input" class="screen-subtitle -mb-3 block text-sm">Notas</label><textarea id="activity-notes-input" placeholder="Ex: Caminhada leve..." rows="3" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea></div></div><footer class="p-4 border-t"><button class="save-btn w-full font-bold py-3 px-4 primary-btn" data-type="activity"><span class="btn-content">Salvar Atividade</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button><div id="ai-activity-impact" class="mt-4 text-xs screen-subtitle text-center p-2 glass-effect rounded-lg hidden"></div></footer></div>
+        <div id="medication-modal" class="detail-modal flex-col pointer-events-auto"><header class="p-4 flex items-center border-b"><button class="close-detail-modal-btn text-purple-500 dark:text-purple-400"><i class="fas fa-chevron-left mr-2"></i> Voltar</button><h2 class="text-lg font-bold screen-title mx-auto">Registrar Medicamento</h2></header><div class="flex-1 p-6 flex flex-col items-center justify-center overflow-y-auto"><div class="w-full max-w-xs space-y-4"><div id="medication-list-container" class="space-y-2"></div><div><label for="medication-name-input" class="screen-subtitle mb-1 block text-sm">Ou digite um novo</label><input id="medication-name-input" type="text" placeholder="Ex: Metformina" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div><div><label for="medication-dose-input" class="screen-subtitle mb-1 block text-sm">Dosagem</label><input id="medication-dose-input" type="text" placeholder="Ex: 500mg" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div><div><label for="medication-timestamp-input" class="screen-subtitle mb-1 block text-sm">Data e Hora</label><input type="datetime-local" id="medication-timestamp-input" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div><div><label for="medication-notes-input" class="screen-subtitle mb-1 block text-sm">Notas</label><textarea id="medication-notes-input" placeholder="Ex: Tomado junto com o café..." rows="3" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea></div></div></div><footer class="p-4 border-t"><button class="save-btn w-full font-bold py-3 px-4 primary-btn" data-type="medication"><span class="btn-content">Salvar Medicamento</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button><div id="ai-medication-tip" class="mt-4 text-xs screen-subtitle text-center p-2 glass-effect rounded-lg hidden"></div></footer></div>
+    </div>
+    
+    <!-- Modal Calculadora de Bolus (Estilo Popup) -->
+    <div id="bolus-calculator-modal" class="fixed inset-0 flex items-center justify-center hidden opacity-0 z-50">
+        <div class="modal-box w-11/12 max-w-sm transform scale-95 opacity-0 p-6 glass-effect">
+            <header class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold screen-title">Calculadora de Bolus</h2><button id="close-bolus-modal-btn" class="screen-subtitle hover:text-gray-700 dark:hover:text-gray-200"><i class="fas fa-times"></i></button></header>
+            <div class="space-y-4">
+                <div><label class="screen-subtitle mb-1 block text-sm">Glicemia Atual (mg/dL)</label><input id="bolus-bg-input" type="number" placeholder="Sua glicemia" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div>
+                <div><label class="screen-subtitle mb-1 block text-sm">Carboidratos (g)</label><input id="bolus-carbs-input" type="number" placeholder="Total de carboidratos" class="w-full text-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"></div>
+                <button id="calculate-bolus-btn" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition">Calcular Dose</button>
+                <div id="bolus-result-section" class="pt-4 border-t border-white/20 hidden"><h3 class="font-bold text-lg screen-title mb-2">Dose Sugerida</h3><div class="space-y-2 screen-subtitle"><div class="flex justify-between"><span>Refeição:</span><span id="bolus-meal-result" class="font-semibold">0.0 un</span></div><div class="flex justify-between"><span>Correção:</span><span id="bolus-correction-result" class="font-semibold">0.0 un</span></div></div><div class="flex justify-between font-bold text-xl mt-3 text-purple-500 dark:text-purple-400"><span>Dose Total:</span><span id="bolus-total-result">0.0 un</span></div><div id="ai-bolus-tuning" class="mt-3 text-xs screen-subtitle text-center p-2 glass-effect rounded-lg hidden"></div></div>
+            </div>
+            <footer class="mt-4"><button id="apply-and-log-bolus-btn" class="w-full font-bold py-3 px-4 primary-btn disabled:bg-gray-400 dark:disabled:bg-gray-600" disabled>Aplicar e Registrar</button></footer>
+        </div>
+    </div>
+
+    <!-- Modal Principal de Registro -->
+    <div id="log-modal" class="fixed inset-0 flex items-end justify-center hidden modal-backdrop opacity-0 z-30 lg:items-center">
+        <div class="modal-content w-full max-w-md transform translate-y-full opacity-0 p-6 glass-effect rounded-t-3xl lg:rounded-3xl lg:translate-y-0 lg:scale-95">
+             <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold screen-title">Registrar Entrada</h2><button id="close-modal-btn" class="screen-subtitle hover:text-gray-800 dark:hover:text-white"><i class="fas fa-times text-2xl"></i></button></div>
+             <div class="grid grid-cols-4 gap-4 text-center">
+                 <div class="log-option flex flex-col justify-center items-center p-2 rounded-2xl cursor-pointer h-24 glass-effect hover:bg-white/20" data-modal="glucose-modal"><i class="fas fa-tint text-2xl text-blue-400"></i><p class="mt-2 font-semibold text-blue-800 dark:text-blue-300 text-xs">Glicose</p></div>
+                 <div class="log-option flex flex-col justify-center items-center p-2 rounded-2xl cursor-pointer h-24 glass-effect hover:bg-white/20" data-modal="insulin-modal"><i class="fas fa-syringe text-2xl text-purple-400"></i><p class="mt-2 font-semibold text-purple-800 dark:text-purple-300 text-xs">Insulina</p></div>
+                 <div class="log-option flex flex-col justify-center items-center p-2 rounded-2xl cursor-pointer h-24 glass-effect hover:bg-white/20" data-modal="meal-modal"><i class="fas fa-utensils text-2xl text-green-400"></i><p class="mt-2 font-semibold text-green-800 dark:text-green-300 text-xs">Refeição</p></div>
+                 <div class="log-option flex flex-col justify-center items-center p-2 rounded-2xl cursor-pointer h-24 glass-effect hover:bg-white/20" data-modal="activity-modal"><i class="fas fa-walking text-2xl text-orange-400"></i><p class="mt-2 font-semibold text-orange-800 dark:text-orange-300 text-xs">Atividade</p></div>
+                 <div class="log-option flex flex-col justify-center items-center p-2 rounded-2xl cursor-pointer h-24 glass-effect hover:bg-white/20" data-modal="medication-modal"><i class="fas fa-pills text-2xl text-teal-400"></i><p class="mt-2 font-semibold text-teal-800 dark:text-teal-300 text-xs">Medicamento</p></div>
+                 <div class="log-option flex flex-col justify-center items-center p-2 rounded-2xl cursor-pointer h-24 col-span-3 glass-effect hover:bg-white/20" data-modal="bolus-calculator-modal"><i class="fas fa-calculator text-2xl text-yellow-400"></i><p class="mt-2 font-semibold text-yellow-800 dark:text-yellow-300 text-xs">Calculadora</p></div>
+             </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Seleção de Data para Relatório -->
+    <div id="report-date-modal" class="fixed inset-0 flex items-center justify-center hidden opacity-0 z-50">
+        <div class="modal-box w-11/12 max-w-sm transform scale-95 opacity-0 p-6 glass-effect">
+            <header class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold screen-title">Selecionar Período</h2><button id="close-date-modal-btn" class="screen-subtitle hover:text-gray-700 dark:hover:text-gray-200"><i class="fas fa-times"></i></button></header>
+            <div class="space-y-4">
+                <div><label for="start-date" class="screen-subtitle mb-1 block text-sm">Data de Início</label><input type="date" id="start-date" class="w-full text-lg p-3"></div>
+                <div><label for="end-date" class="screen-subtitle mb-1 block text-sm">Data de Fim</label><input type="date" id="end-date" class="w-full text-lg p-3"></div>
+            </div>
+            <footer class="mt-6"><button id="generate-pdf-btn" class="w-full font-bold py-3 px-4 primary-btn"><span class="btn-content">Gerar Relatório</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button></footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed left-1/2 -translate-x-1/2 py-2 px-6 opacity-0 transform translate-y-10 z-50"></div>
+
+    <!-- Firebase SDKs & App Logic -->
+    <script type="module">
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            let app, auth, db;
+            let currentUser = null;
+            let unsubscribeFromFirestore = null;
+
+            const setupScreen = document.getElementById('setup-screen');
+            const setupContent = document.getElementById('setup-content');
+            const retryButton = document.getElementById('retry-button');
+            const loginScreen = document.getElementById('login-screen');
+            const authScreen = document.getElementById('auth-screen');
+            const loadingContent = document.getElementById('loading-content');
+            const appContainer = document.getElementById('app-container');
+            const googleLoginButton = document.getElementById('google-login-button');
+            const anonLoginButton = document.getElementById('anon-login-button');
+            const mainContent = document.getElementById('main-content');
+            const timeEl = document.getElementById('time');
+            const detailModalsContainer = document.getElementById('detail-modals-container');
+
+            async function initialize() {
+                let firebaseConfig;
+                try {
+                     firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                     if (!firebaseConfig.apiKey) {
+                         throw new Error("Firebase config not found or invalid.");
+                     }
+                } catch(e) {
+                    console.warn("Could not parse __firebase_config, using fallback.");
+                    firebaseConfig = {
+                        apiKey: "AIzaSyBhsOav1Lk7OoVVBe5sYvHwwzyEOnRfi3Q", // Substitua se necessário
+                        authDomain: "daniloth3dan-diabetes.firebaseapp.com",
+                        projectId: "daniloth3dan-diabetes",
+                        storageBucket: "daniloth3dan-diabetes.appspot.com",
+                        messagingSenderId: "396918812521",
+                        appId: "1:396918812521:web:08d84fbbc54fc9299497f8"
+                    };
+                }
+
+                try {
+                    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            currentUser = user;
+                            if (!isDataLoaded) {
+                                console.log("Usuário autenticado:", user.uid);
+                                setupFirestoreListener();
+                            }
+                        } else {
+                            resetAppState();
+                            showAuthScreen();
+                        }
+                    });
+
+                    const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    if (authToken && !auth.currentUser) {
+                         await signInWithCustomToken(auth, authToken);
+                    } else if (!auth.currentUser){
+                         showAuthScreen();
+                    }
+
+                } catch (error) {
+                    handleAuthError(error);
+                }
+            }
+            
+            googleLoginButton.addEventListener('click', async () => {
+                showLoading();
+                const provider = new GoogleAuthProvider();
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (error)
+                 {
+                    handleAuthError(error);
+                }
+            });
+
+            anonLoginButton.addEventListener('click', async () => {
+                showLoading();
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    handleAuthError(error);
+                }
+            });
+
+            retryButton.addEventListener('click', () => {
+                location.reload();
+            });
+
+            function handleAuthError(error) {
+                console.error("Falha na autenticação:", error);
+                const domain = window.location.hostname || 'o seu domínio atual';
+                let content = `<p class="mb-2">Ocorreu um erro de configuração no seu projeto Firebase.</p><p class="font-bold">Por favor, verifique os seguintes pontos na sua <a href="https://console.firebase.google.com/" target="_blank" class="text-purple-600 underline">Consola do Firebase</a>:</p><div class="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700"><p class="font-bold">1. Domínios Autorizados</p><p class="mt-1">Vá a <strong>Authentication > Settings > Authorized domains</strong> e adicione:</p><ul class="list-disc list-inside mt-2 font-mono text-xs"><li>localhost</li><li class="break-all">${domain}</li></ul></div><div class="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700"><p class="font-bold">2. Provedores de Login</p><p class="mt-1">Vá a <strong>Authentication > Sign-in method</strong> e ative <strong>Google</strong> e <strong>Anônimo</strong>.</p></div>`;
+                showSetupScreen(content);
+            }
+
+            function showDatabaseError(error) {
+                console.error("Erro na base de dados:", error);
+                let content = `<p class="mb-2">A aplicação foi bloqueada ao tentar aceder à base de dados. Verifique as <strong>Regras de Segurança do Firestore</strong>.</p><div class="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700"><p class="font-bold">Ação Necessária: Atualizar Regras do Firestore</p><ol class="list-decimal list-inside mt-2 text-sm"><li class="mb-2">Vá à sua <strong>Consola Firebase</strong> > <strong>Firestore Database</strong> > <strong>Regras</strong>.</li><li>Cole o seguinte código:</li></ol><pre class="bg-gray-200 p-2 rounded text-xs mt-2 text-left w-full overflow-x-auto"><code>rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /artifacts/{appId}/users/{userId}/{documents=**} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n    }\n  }\n}</code></pre></div>`;
+                showSetupScreen(content);
+            }
+            
+            initialize();
+
+            // DADOS E ESTADO DA APLICAÇÃO
+            const dailyTips = ["Lembre-se de beber água ao longo do dia.", "Uma caminhada de 15 minutos após as refeições pode ajudar a estabilizar a glicose.", "Verifique a validade das suas tiras de teste.", "Tente incluir vegetais nas suas refeições principais.", "Uma boa noite de sono é fundamental para o controle da diabetes."];
+            
+            let currentMeal = [];
+            let foodSearchTimeout;
+            const defaultUserSettings = { 
+                targetBg: 120, 
+                theme: 'light', 
+                unlockedAchievements: [], 
+                calculationSettings: { 
+                    morning: { carbRatio: 15, sensitivityFactor: 50 }, 
+                    afternoon: { carbRatio: 15, sensitivityFactor: 50 }, 
+                    night: { carbRatio: 15, sensitivityFactor: 50 } 
+                },
+                diabetesProfile: { type: 'Não especificado', diagnosisDate: '', weight: 70, height: 175 },
+                medications: [],
+                emergencyContact: { name: '', phone: '', notes: '' }
+            };
+            let userSettings = JSON.parse(JSON.stringify(defaultUserSettings));
+            let appState = { logHistory: [] };
+            let dashboardMetrics = {};
+            let activeCharts = {};
+            let isDataLoaded = false;
+            const analysisApiKey = "AIzaSyDz5wj6eYWdQKtlfLQOX6WpTxOL3xIgXvc";
+
+            // FUNÇÕES UTILITÁRIAS
+            function formatToDateTimeLocal(date) { const year = date.getFullYear(); const month = (date.getMonth() + 1).toString().padStart(2, '0'); const day = date.getDate().toString().padStart(2, '0'); const hours = date.getHours().toString().padStart(2, '0'); const minutes = date.getMinutes().toString().padStart(2, '0'); return `${year}-${month}-${day}T${hours}:${minutes}`; }
+            function applyTheme(theme) { if (theme === 'dark') { document.documentElement.classList.add('dark'); Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)'; Chart.defaults.color = '#d1d5db'; } else { document.documentElement.classList.remove('dark'); Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.1)'; Chart.defaults.color = '#374151'; } userSettings.theme = theme; const activeScreen = document.querySelector('.nav-item.active')?.dataset.screen; if (isDataLoaded && (activeScreen === 'dashboard' || activeScreen === 'analysis' || activeScreen === 'reports')) { renderScreen(activeScreen); } }
+            function toggleTheme() { const newTheme = userSettings.theme === 'light' ? 'dark' : 'light'; applyTheme(newTheme); saveState(); }
+            function getMealPeriod() { const hour = new Date().getHours(); if (hour >= 5 && hour < 12) { return 'morning'; } else if (hour >= 12 && hour < 18) { return 'afternoon'; } else { return 'night'; } }
+
+            // CONTROLE DE VISIBILIDADE DAS TELAS PRINCIPAIS
+            function showLoading() { loginScreen.classList.remove('hidden'); authScreen.classList.add('hidden'); loadingContent.classList.remove('hidden'); setupScreen.classList.add('hidden'); }
+            function showAuthScreen() { loadingContent.classList.add('hidden'); authScreen.classList.remove('hidden'); appContainer.classList.add('hidden'); loginScreen.classList.remove('hidden'); setupScreen.classList.add('hidden'); }
+            function showSetupScreen(content) { setupContent.innerHTML = content; loginScreen.classList.add('hidden'); appContainer.classList.add('hidden'); setupScreen.classList.remove('hidden', 'opacity-0', 'scale-95'); }
+            function showAppContainer() {
+                loginScreen.classList.add('hidden'); setupScreen.classList.add('hidden'); appContainer.classList.remove('hidden');
+                const mainContentEl = document.getElementById('main-content');
+                if (mainContentEl) {
+                    let lastScrollTop = 0; const logButton = document.getElementById('log-button'); const navContainer = document.querySelector('.floating-nav-container');
+                    mainContentEl.addEventListener('scroll', () => {
+                        let scrollTop = mainContentEl.scrollTop;
+                        if (scrollTop > lastScrollTop && scrollTop > 50) { logButton.classList.add('hidden'); navContainer.classList.add('hidden'); } 
+                        else { logButton.classList.remove('hidden'); navContainer.classList.remove('hidden'); }
+                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+                    }, false);
+                    mainContentEl.addEventListener('wheel', (e) => { e.preventDefault(); mainContentEl.scrollTop += e.deltaY; });
+                }
+            }
+
+            // GESTÃO DE ESTADO E DADOS (FIRESTORE)
+            function resetAppState() { currentUser = null; isDataLoaded = false; if (unsubscribeFromFirestore) { unsubscribeFromFirestore(); unsubscribeFromFirestore = null; } userSettings = JSON.parse(JSON.stringify(defaultUserSettings)); appState = { logHistory: [] }; applyTheme('light'); }
+            function setupFirestoreListener() {
+                if (!currentUser) return;
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const docRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/userData`, "state");
+                unsubscribeFromFirestore = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        appState = data.appState || { logHistory: [] }; 
+                        userSettings = _.merge({}, defaultUserSettings, data.userSettings || {});
+                        appState.logHistory.forEach(log => { if (log.timestamp && typeof log.timestamp.toDate === 'function') { log.timestamp = log.timestamp.toDate(); } });
+                    } else { console.log("Nenhum documento encontrado. Usando estado padrão e salvando..."); saveState(); }
+                    applyTheme(userSettings.theme || 'light');
+                    if (!isDataLoaded) { isDataLoaded = true; initializeAppLogic(); }
+                    const activeScreen = document.querySelector('.nav-item.active')?.dataset.screen;
+                    if (activeScreen) { renderScreen(activeScreen); }
+                }, (error) => { showDatabaseError(error); });
+            }
+
+            async function saveState() { if (!currentUser) return; try { const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; const docRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/userData`, "state"); await setDoc(docRef, { appState, userSettings }); console.log("Estado salvo no Firestore."); } catch (error) { console.error("Erro ao salvar estado no Firestore: ", error); showToast("Erro ao salvar dados."); } }
+            
+            // LÓGICA PRINCIPAL DA APLICAÇÃO
+            function initializeAppLogic() { showAppContainer(); setInterval(updateTime, 60000); updateTime(); renderScreen('dashboard'); createSlider('glucose-slider-container', { min: 0, max: 1000, step: 1, initial: 120 }); createSlider('insulin-slider-container', { min: 0, max: 50, step: 0.5, initial: 0, format: val => val.toFixed(1) }); createSlider('activity-slider-container', { min: 0, max: 180, step: 5, initial: 30 }); }
+            function calculateDashboardMetrics() {
+                const today = new Date().toDateString(); const logsToday = appState.logHistory.filter(entry => new Date(entry.timestamp).toDateString() === today); const metrics = { lastGlucose: null, glucoseTime: null, totalBolusInsulin: 0, totalBasalInsulin: 0, totalCarbs: 0, averageGlucose: 0, totalActivity: 0 }; const glucoseLogs = appState.logHistory.filter(e => e.type === 'glucose').sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (glucoseLogs.length > 0) { metrics.lastGlucose = glucoseLogs[0].rawData.value; metrics.glucoseTime = new Date(glucoseLogs[0].timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+                const glucoseLogsToday = logsToday.filter(e => e.type === 'glucose');
+                if (glucoseLogsToday.length > 0) { metrics.averageGlucose = Math.round(glucoseLogsToday.reduce((sum, log) => sum + log.rawData.value, 0) / glucoseLogsToday.length); }
+                logsToday.forEach(entry => { if (entry.type === 'insulin') { if (entry.rawData.insulinType === 'Bolus (Lispro)') metrics.totalBolusInsulin += entry.rawData.dose; else if (entry.rawData.insulinType === 'Basal (Glargina)') metrics.totalBasalInsulin += entry.rawData.dose; } if (entry.type === 'meal') metrics.totalCarbs += entry.rawData.carbs; if (entry.type === 'activity') metrics.totalActivity += entry.rawData.duration; });
+                dashboardMetrics = metrics;
+            }
+
+            function destroyCharts() {
+                Object.values(activeCharts).forEach(chart => {
+                    if (chart) chart.destroy();
+                });
+                activeCharts = {};
+            }
+
+             function renderReportStats(period) {
+                const reportContent = document.getElementById('report-content'); if (!reportContent) return; 
+                generateReportSummaryAI(period);
+                const days = period === 'weekly' ? 7 : 30;
+                const endDate = new Date(); const startDate = new Date(); 
+                startDate.setDate(startDate.getDate() - days);
+
+                const glucoseLogs = appState.logHistory.filter(e => e.type === 'glucose' && new Date(e.timestamp) >= startDate && new Date(e.timestamp) <= endDate);
+                if (glucoseLogs.length === 0) { 
+                    reportContent.innerHTML = `<div class="text-center p-10 screen-subtitle"><p class="font-semibold">Não há dados de glicose suficientes para este período.</p></div>`; 
+                    document.getElementById('new-reports-section').innerHTML = '';
+                    return;
+                }
+
+                const avgGlucose = Math.round(glucoseLogs.reduce((a, b) => a + b.rawData.value, 0) / glucoseLogs.length); const estimatedHba1c = ((avgGlucose + 46.7) / 28.7).toFixed(1); let lows = 0, inRange = 0, highs = 0;
+                glucoseLogs.forEach(log => { const val = log.rawData.value; if (val < 70) lows++; else if (val <= 180) inRange++; else highs++; });
+                const total = glucoseLogs.length; const inRangePercent = total > 0 ? ((inRange / total) * 100).toFixed(0) : 0; const lowsPercent = total > 0 ? ((lows / total) * 100).toFixed(0) : 0; const highsPercent = total > 0 ? ((highs / total) * 100).toFixed(0) : 0;
+                const statsHtml = `<div class="space-y-4"> <div class="glass-effect p-4 rounded-2xl"> <h3 class="font-bold screen-title mb-2">Resumo Geral</h3> <div class="flex justify-around text-center"> <div> <p class="text-2xl font-bold screen-title">${avgGlucose}</p> <p class="text-xs screen-subtitle">Glicemia Média</p> </div> <div> <p class="text-2xl font-bold screen-title">${estimatedHba1c}%</p> <p class="text-xs screen-subtitle">HbA1c Estimada</p> </div> </div> </div> <div class="glass-effect p-4 rounded-2xl"> <h3 class="font-bold screen-title mb-3">Tempo no Alvo (TIR)</h3> <div class="space-y-3"> <div> <p class="text-xs text-green-700 dark:text-green-300 font-semibold mb-1">No Alvo (70-180 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-green-500 h-4 rounded-full" style="width: ${inRangePercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${inRangePercent}%</span></div> </div> <div> <p class="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">Baixa (< 70 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-red-500 h-4 rounded-full" style="width: ${lowsPercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${lowsPercent}%</span></div> </div> <div> <p class="text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">Alta (> 180 mg/dL)</p> <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 relative"><div class="bg-yellow-500 h-4 rounded-full" style="width: ${highsPercent}%"></div><span class="absolute right-2 top-0 text-xs font-bold text-gray-700 dark:text-gray-200">${highsPercent}%</span></div> </div> </div> </div> </div>`;
+                reportContent.innerHTML = statsHtml;
+                renderGlucoseByPeriodChart(period);
+                renderHypoReport(period);
+            }
+
+             const screens = {
+                dashboard: () => {
+                    calculateDashboardMetrics();
+                    const { lastGlucose, glucoseTime, totalBolusInsulin, totalBasalInsulin, totalCarbs, averageGlucose, totalActivity } = dashboardMetrics;
+                    const glucoseValue = lastGlucose !== null ? lastGlucose : '--';
+                    const isLow = lastGlucose < 70;
+                    const isHigh = lastGlucose > 180;
+                    const welcomeName = currentUser && !currentUser.isAnonymous && currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'Olá';
+                    let glucoseColorClass = '';
+                    if (isLow) glucoseColorClass = 'glucose-circle-low';
+                    else if (isHigh) glucoseColorClass = 'glucose-circle-high';
+                    const tipOfTheDay = dailyTips[new Date().getDate() % dailyTips.length];
+
+                    return `
+                    <div class="p-6">
+                        <header class="mb-6"><h1 class="text-3xl font-bold screen-title">Bom dia, ${welcomeName}!</h1><p class="screen-subtitle">Aqui está o seu resumo diário.</p></header>
+                        <div id="ai-predictive-warning" class="glass-effect p-4 rounded-2xl mb-6 hidden"></div>
+                        <div class="flex justify-center items-center my-6">
+                            <div class="glucose-circle ${glucoseColorClass} rounded-full flex flex-col items-center justify-center">
+                                <span class="text-4xl font-bold">${glucoseValue}</span>
+                                ${isLow ? '<span class="font-semibold text-lg animate-pulse">BAIXA</span>' : '<span class="font-semibold">mg/dL</span>'}
+                                <span class="text-xs screen-subtitle mt-1">${glucoseTime || 'Sem registros'}</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="glass-effect p-3 rounded-2xl col-span-2">
+                                <div class="flex items-center text-purple-600 dark:text-purple-400 mb-2"><i class="fas fa-syringe mr-2"></i><span class="font-semibold screen-title">Insulinas (Dia)</span></div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between items-baseline"><span class="text-sm screen-subtitle">Bolus (Rápida)</span><span class="font-bold text-lg screen-title">${totalBolusInsulin.toFixed(1)} un</span></div>
+                                    <div class="flex justify-between items-baseline"><span class="text-sm screen-subtitle">Basal (Lenta)</span><span class="font-bold text-lg screen-title">${totalBasalInsulin.toFixed(1)} un</span></div>
+                                </div>
+                            </div>
+                            <div class="glass-effect p-4 rounded-2xl flex flex-col justify-center">
+                                <div class="flex items-center text-green-600 dark:text-green-400"><i class="fas fa-utensils mr-2"></i><span class="font-semibold screen-title">Carbs</span></div>
+                                <p class="text-2xl font-bold mt-2 screen-title">${totalCarbs.toFixed(0)} <span class="text-base font-normal">g</span></p>
+                            </div>
+                             <div class="glass-effect p-4 rounded-2xl flex flex-col justify-center">
+                                <div class="flex items-center text-cyan-600 dark:text-cyan-400"><i class="fas fa-balance-scale mr-2"></i><span class="font-semibold screen-title">Média</span></div>
+                                <p class="text-2xl font-bold mt-2 screen-title">${averageGlucose} <span class="text-base font-normal">mg/dL</span></p>
+                            </div>
+                             <div class="glass-effect p-4 rounded-2xl flex flex-col justify-center col-span-2">
+                                <div class="flex items-center text-orange-600 dark:text-orange-400"><i class="fas fa-walking mr-2"></i><span class="font-semibold screen-title">Atividade</span></div>
+                                <p class="text-2xl font-bold mt-2 screen-title">${totalActivity} <span class="text-base font-normal">min</span></p>
+                            </div>
+                        </div>
+                        <div class="glass-effect p-4 rounded-2xl mb-6">
+                            <h3 class="font-bold screen-title mb-2 flex items-center"><i class="fas fa-brain text-purple-500 mr-2"></i>Insight do Dia com IA</h3>
+                             <p class="text-xs screen-subtitle mb-4">Receba uma dica rápida baseada nos seus registros de hoje.</p>
+                            <button id="generate-dashboard-insight-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center primary-btn text-sm">
+                                Gerar Insight
+                            </button>
+                            <div id="dashboard-insight-result" class="mt-3 text-sm screen-subtitle"></div>
+                        </div>
+                        <div class="glass-effect p-4 rounded-2xl mb-6"><h3 class="font-bold screen-title mb-2">Tendência de Glicose de Hoje</h3><div class="relative h-48"><canvas id="glucoseChart"></canvas></div></div>
+                        <div class="glass-effect p-4 rounded-2xl"><h3 class="font-bold screen-title mb-2 flex items-center"><i class="fas fa-lightbulb mr-2"></i>Dica do Dia</h3><p class="text-sm screen-subtitle">${tipOfTheDay}</p></div>
+                    </div>`;
+                },
+                history: () => {
+                    const sortedLogs = appState.logHistory.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    const groupedLogs = sortedLogs.reduce((acc, log) => {
+                        const date = new Date(log.timestamp).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' });
+                        if (!acc[date]) { acc[date] = []; }
+                        acc[date].push(log);
+                        return acc;
+                    }, {});
+
+                    let logbookHtml = Object.keys(groupedLogs).map(date => {
+                        const entriesHtml = groupedLogs[date].map(entry => {
+                            const noteHtml = entry.rawData.notes ? `<p class="text-xs screen-subtitle mt-1 italic">Nota: ${entry.rawData.notes}</p>` : '';
+                            let title = entry.type.charAt(0).toUpperCase() + entry.type.slice(1);
+                             if (entry.type === 'meal' && entry.rawData.mealType) { title = entry.rawData.mealType; } 
+                             else if (entry.type === 'glucose') { title = 'Glicose'; } 
+                             else if (entry.type === 'insulin') { title = entry.rawData.insulinType.split(' ')[0]; }
+                             else if (entry.type === 'activity') { title = 'Atividade'; }
+                             else if (entry.type === 'medication') { title = entry.rawData.name; }
+
+                            return `<div class="p-4 border-b border-white/10 last:border-b-0">
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full glass-effect flex items-center justify-center mr-4 flex-shrink-0"><i class="fas ${entry.icon} ${entry.color}"></i></div>
+                                    <div class="flex-1">
+                                        <p class="font-semibold screen-title">${title}</p>
+                                        <p class="text-sm screen-subtitle">${entry.value}</p>
+                                        ${noteHtml}
+                                    </div>
+                                    <div class="text-right ml-2 flex-shrink-0">
+                                        <p class="text-sm font-semibold screen-title">${new Date(entry.timestamp).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</p>
+                                        <button class="delete-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 mt-2" data-log-id="${entry.id}"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }).join('');
+
+                        return `<div class="mb-4">
+                            <h2 class="logbook-date-header sticky top-0 z-10 p-2 text-center font-bold screen-title text-sm rounded-full mb-2">${date}</h2>
+                            <div class="glass-effect rounded-2xl overflow-hidden">${entriesHtml}</div>
+                        </div>`;
+                    }).join('');
+
+                    if (sortedLogs.length === 0) {
+                        logbookHtml = `<div class="text-center p-10 screen-subtitle flex flex-col items-center mt-10">
+                            <svg class="w-24 h-24 text-gray-300 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                            <p class="font-semibold screen-title text-lg">Nenhum registro encontrado.</p>
+                            <p class="text-sm mt-1">Use o botão <i class="fas fa-plus-circle text-purple-500"></i> para começar a registrar.</p>
+                        </div>`;
+                    }
+                    
+                    return `<div class="p-6"><header class="mb-6"><h1 class="text-3xl font-bold screen-title">Diário</h1></header><div id="logbook-container">${logbookHtml}</div></div>`;
+                },
+                goals: () => `
+                    <div class="p-6">
+                         <header class="mb-6"><h1 class="text-3xl font-bold screen-title">Metas e Conquistas</h1><p class="screen-subtitle">Acompanhe seu progresso e veja sugestões da IA.</p></header>
+                         <div class="glass-effect p-4 rounded-2xl mb-6">
+                            <h3 class="font-bold screen-title mb-2 flex items-center"><i class="fas fa-lightbulb text-yellow-400 mr-2"></i> Sugestões da IA</h3>
+                            <p class="text-xs screen-subtitle mb-4">Com base nos seus dados, aqui estão algumas metas que você pode considerar.</p>
+                            <button id="generate-goal-suggestion-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center primary-btn text-sm">
+                                Gerar Novas Sugestões
+                            </button>
+                            <div id="ai-goal-suggestions" class="mt-4 text-sm screen-subtitle space-y-2"></div>
+                        </div>
+                         <div id="goals-content" class="space-y-3"></div>
+                    </div>
+                `,
+                reports: () => `
+                    <div class="p-6">
+                        <header class="mb-6"><h1 class="text-3xl font-bold screen-title">Relatórios</h1><p class="screen-subtitle">Veja seu progresso e identifique padrões.</p></header>
+                        <div id="ai-report-summary" class="glass-effect p-4 rounded-2xl mb-6"></div>
+                        <div class="mb-6 flex justify-center glass-effect p-1 rounded-full">
+                            <button id="report-weekly-btn" class="period-btn active-period-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold">Semanal</button>
+                            <button id="report-monthly-btn" class="period-btn inactive-period-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold">Mensal</button>
+                        </div>
+                        <div id="report-content"></div>
+                        <div id="new-reports-section" class="space-y-6 mt-6">
+                            <div class="glass-effect p-4 rounded-2xl">
+                                <h3 class="font-bold screen-title mb-2">Glicose por Período do Dia</h3>
+                                <div class="relative h-64"><canvas id="glucoseByPeriodChart"></canvas></div>
+                            </div>
+                            <div class="glass-effect p-4 rounded-2xl">
+                                <h3 class="font-bold screen-title mb-2">Relatório de Hipoglicemia</h3>
+                                <div id="hypo-events-list" class="text-sm space-y-2 max-h-48 overflow-y-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                analysis: () => `
+                <div class="p-6">
+                    <header class="mb-6"><h1 class="text-3xl font-bold screen-title">Análise Avançada</h1><p class="screen-subtitle">Analise os seus padrões em diferentes períodos.</p></header>
+                    
+                    <div class="mb-6 flex justify-center glass-effect p-1 rounded-full">
+                        <button id="analysis-7d-btn" class="period-btn active-period-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold">7 Dias</button>
+                        <button id="analysis-30d-btn" class="period-btn inactive-period-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold">30 Dias</button>
+                    </div>
+
+                    <div class="glass-effect p-4 rounded-2xl mb-6">
+                        <h3 class="font-bold screen-title mb-2">Tempo no Alvo (TIR)</h3>
+                        <p class="text-xs screen-subtitle mb-4">Percentagem de tempo em cada faixa.</p>
+                        <div class="relative h-64"><canvas id="tirChart"></canvas></div>
+                    </div>
+                     <div class="glass-effect p-4 rounded-2xl mb-6">
+                        <h3 class="font-bold screen-title mb-2 flex items-center"><i class="fas fa-brain text-purple-500 dark:text-purple-400 mr-2"></i>Análise Inteligente</h3>
+                         <p class="text-xs screen-subtitle mb-4">Insights sobre seus dados com IA.</p>
+                        <button id="generate-ai-analysis-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition flex items-center justify-center primary-btn">
+                            <i class="fas fa-magic mr-2"></i>Gerar Análise com IA
+                        </button>
+                        <div id="ai-analysis-result" class="mt-4 text-sm screen-subtitle space-y-2"></div>
+                         <p class="text-xs text-center screen-subtitle opacity-50 mt-4">Atenção: A análise da IA não substitui o aconselhamento médico.</p>
+                    </div>
+                    <div class="glass-effect p-4 rounded-2xl">
+                         <h3 class="font-bold screen-title mb-2">Relatórios</h3>
+                         <p class="text-xs screen-subtitle mb-4">Exporte um resumo para compartilhar.</p>
+                         <button id="export-pdf-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition flex items-center justify-center primary-btn"><i class="fas fa-file-pdf mr-2"></i>Exportar Relatório PDF</button>
+                    </div>
+                </div>
+                `,
+                profile: () => {
+                    const profile = userSettings.diabetesProfile || {};
+                    const emergency = userSettings.emergencyContact || {};
+                    const medications = userSettings.medications || [];
+                    const calcSettings = userSettings.calculationSettings || {};
+
+                    return `
+                    <div class="p-6">
+                        <header class="mb-6"><h1 class="text-3xl font-bold screen-title">Perfil e Configurações</h1></header>
+                         <div class="glass-effect p-4 rounded-2xl mb-4">
+                            <h3 class="font-bold screen-title mb-4">Conta</h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between items-center screen-subtitle"><span>Nome:</span><span class="font-semibold screen-title">${currentUser && !currentUser.isAnonymous ? currentUser.displayName : 'Usuário Anônimo'}</span></div>
+                                <div class="flex justify-between items-center screen-subtitle"><span>Email:</span><span class="font-semibold screen-title">${currentUser && !currentUser.isAnonymous ? currentUser.email : ''}</span></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-effect p-4 rounded-2xl mb-4">
+                            <h3 class="font-bold screen-title mb-4">Perfil Diabético</h3>
+                            <div class="space-y-3 text-sm screen-subtitle">
+                                <div class="flex justify-between items-center"><span>Tipo de Diabetes:</span><input id="setting-diabetes-type" type="text" class="font-semibold bg-transparent text-right w-32 border-b border-white/20 p-1" value="${profile.type || ''}" placeholder="Ex: Tipo 1"></div>
+                                <div class="flex justify-between items-center"><span>Data do Diagnóstico:</span><input id="setting-diagnosis-date" type="date" class="font-semibold bg-transparent text-right w-32 border-b border-white/20 p-1" value="${profile.diagnosisDate || ''}"></div>
+                                <div class="flex justify-between items-center"><span>Peso (kg):</span><input id="setting-weight" type="number" class="font-semibold bg-transparent text-right w-32 border-b border-white/20 p-1" value="${profile.weight || ''}" placeholder="Ex: 75"></div>
+                                <div class="flex justify-between items-center"><span>Altura (cm):</span><input id="setting-height" type="number" class="font-semibold bg-transparent text-right w-32 border-b border-white/20 p-1" value="${profile.height || ''}" placeholder="Ex: 180"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-effect p-4 rounded-2xl mb-4">
+                            <h3 class="font-bold screen-title mb-4">Meus Medicamentos</h3>
+                            <div id="medication-list-profile" class="space-y-2 text-sm">
+                                ${medications.map((med, index) => `
+                                    <div class="flex justify-between items-center bg-white/10 p-2 rounded-lg">
+                                        <span>${med.name} - ${med.dose}</span>
+                                        <button class="delete-med-btn text-red-400 hover:text-red-600" data-index="${index}"><i class="fas fa-times-circle"></i></button>
+                                    </div>
+                                `).join('') || '<p class="text-xs screen-subtitle">Nenhum medicamento adicionado.</p>'}
+                            </div>
+                            <div class="flex space-x-2 mt-4">
+                                <input id="new-med-name" class="flex-1" placeholder="Nome do Medicamento">
+                                <input id="new-med-dose" class="w-24" placeholder="Dose">
+                                <button id="add-med-btn" class="bg-purple-500 text-white rounded-lg px-3 hover:bg-purple-600 transition"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="glass-effect p-4 rounded-2xl mb-4">
+                            <h3 class="font-bold screen-title mb-4">Contato de Emergência</h3>
+                            <div class="space-y-3 text-sm screen-subtitle">
+                                <div class="flex justify-between items-center"><span>Nome:</span><input id="setting-emergency-name" type="text" class="font-semibold bg-transparent text-right w-40 border-b border-white/20 p-1" value="${emergency.name || ''}"></div>
+                                <div class="flex justify-between items-center"><span>Telefone:</span><input id="setting-emergency-phone" type="tel" class="font-semibold bg-transparent text-right w-40 border-b border-white/20 p-1" value="${emergency.phone || ''}"></div>
+                                <div><label>Notas Importantes:</label><textarea id="setting-emergency-notes" rows="2" class="w-full mt-1 bg-transparent border border-white/20 p-1 text-xs">${emergency.notes || ''}</textarea></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-effect p-4 rounded-2xl mb-4">
+                            <h3 class="font-bold screen-title mb-4">Aparência</h3>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm screen-subtitle">Modo Escuro</span>
+                                <label class="theme-switch" for="theme-toggle"><input type="checkbox" id="theme-toggle" ${userSettings.theme === 'dark' ? 'checked' : ''}><span class="slider round"></span></label>
+                            </div>
+                        </div>
+                        <div class="glass-effect p-4 rounded-2xl mb-4">
+                            <h3 class="font-bold screen-title mb-4">Cálculo Avançado</h3>
+                             <div class="space-y-3 text-sm screen-subtitle">
+                                <div class="flex justify-between items-center"><span>Glicemia Alvo (mg/dL):</span><input id="setting-targetBg" type="number" class="font-semibold bg-transparent text-right w-24 border-b border-white/20 p-1" value="${userSettings.targetBg}"></div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-white/20 space-y-4">
+                                <div class="grid grid-cols-3 gap-x-2 items-center"><span class="font-semibold col-span-1 screen-title"><i class="fas fa-sun mr-2 text-yellow-500"></i>Manhã</span> <div class="col-span-2 space-y-2"><div class="flex justify-between items-center text-xs screen-subtitle"><span>Relação C:I</span><input id="setting-carbRatio-morning" type="number" class="font-semibold bg-transparent text-right w-16 border-b border-white/20 p-1" value="${calcSettings.morning.carbRatio}"></div><div class="flex justify-between items-center text-xs screen-subtitle"><span>Fator Sensib.</span><input id="setting-sensitivityFactor-morning" type="number" class="font-semibold bg-transparent text-right w-16 border-b border-white/20 p-1" value="${calcSettings.morning.sensitivityFactor}"></div></div></div>
+                                <div class="grid grid-cols-3 gap-x-2 items-center"><span class="font-semibold col-span-1 screen-title"><i class="fas fa-cloud-sun mr-2 text-orange-500"></i>Tarde</span> <div class="col-span-2 space-y-2"><div class="flex justify-between items-center text-xs screen-subtitle"><span>Relação C:I</span><input id="setting-carbRatio-afternoon" type="number" class="font-semibold bg-transparent text-right w-16 border-b border-white/20 p-1" value="${calcSettings.afternoon.carbRatio}"></div><div class="flex justify-between items-center text-xs screen-subtitle"><span>Fator Sensib.</span><input id="setting-sensitivityFactor-afternoon" type="number" class="font-semibold bg-transparent text-right w-16 border-b border-white/20 p-1" value="${calcSettings.afternoon.sensitivityFactor}"></div></div></div>
+                                <div class="grid grid-cols-3 gap-x-2 items-center"><span class="font-semibold col-span-1 screen-title"><i class="fas fa-moon mr-2 text-blue-400"></i>Noite</span> <div class="col-span-2 space-y-2"><div class="flex justify-between items-center text-xs screen-subtitle"><span>Relação C:I</span><input id="setting-carbRatio-night" type="number" class="font-semibold bg-transparent text-right w-16 border-b border-white/20 p-1" value="${calcSettings.night.carbRatio}"></div><div class="flex justify-between items-center text-xs screen-subtitle"><span>Fator Sensib.</span><input id="setting-sensitivityFactor-night" type="number" class="font-semibold bg-transparent text-right w-16 border-b border-white/20 p-1" value="${calcSettings.night.sensitivityFactor}"></div></div></div>
+                            </div>
+                        </div>
+                        <button id="save-settings-btn" class="w-full primary-btn font-bold py-3 px-4 mt-6"><span class="btn-content">Salvar Alterações</span><span class="btn-loader"></span><span class="btn-success"><i class="fas fa-check"></i></span></button>
+                        <button id="sign-out-btn" class="w-full bg-red-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-600 transition mt-4">Sair</button>
+                    </div>`
+                }
+            };
+            
+            // CONTROLE DE MODALS E FEEDBACK
+            function openModal(selector) { triggerHapticFeedback('light'); const modal = document.querySelector(selector); modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); (modal.querySelector('.modal-content') || modal.querySelector('.modal-box')).classList.remove('translate-y-full', 'opacity-0', 'scale-95'); }, 10); }
+            function closeModal(selector) { const modal = document.querySelector(selector); if (!modal) return; const modalContent = modal.querySelector('.modal-content') || modal.querySelector('.modal-box'); if (modalContent) { modalContent.classList.add('translate-y-full', 'opacity-0', 'scale-95'); } modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); }
+            
+            function openDetailModal(modalId) { 
+                triggerHapticFeedback('light');
+                detailModalsContainer.classList.add('active');
+                
+                const currentlyOpen = detailModalsContainer.querySelector('.detail-modal.open');
+                if (currentlyOpen) {
+                    currentlyOpen.classList.remove('open');
+                }
+
+                const modal = document.getElementById(modalId); 
+                if(!modal) return; 
+                modal.classList.add('open');
+
+                const timestampInput = modal.querySelector('input[type="datetime-local"]');
+                if (timestampInput) { timestampInput.value = formatToDateTimeLocal(new Date()); }
+                if (modalId === 'meal-modal') { currentMeal = []; updateMealSummary(); document.getElementById('food-search-input').value = ''; document.getElementById('search-results').innerHTML = ''; document.getElementById('meal-notes-input').value = ''; document.getElementById('ai-photo-analysis-section').innerHTML = ''; document.getElementById('ai-photo-analysis-section').classList.add('hidden'); } 
+                else if (modalId === 'add-food-modal') { document.getElementById('add-food-modal-title').textContent = 'Adicionar Alimento'; document.getElementById('food-name-input').value = ''; document.getElementById('food-brand-input').value = ''; document.getElementById('food-portion-input').value = ''; document.getElementById('food-carbs-input').value = ''; document.getElementById('editing-food-id').value = ''; } 
+                else if (modalId === 'medication-modal') { renderMedicationSelection(); }
+                else if (modalId === 'bolus-calculator-modal') { generateBolusTuningSuggestion(); }
+                else { const notesInput = modal.querySelector('textarea'); if(notesInput) notesInput.value = ''; }
+            }
+
+            function closeAllDetailModals() { 
+                detailModalsContainer.classList.remove('active');
+                const currentlyOpen = detailModalsContainer.querySelector('.detail-modal.open');
+                if (currentlyOpen) {
+                    currentlyOpen.classList.remove('open');
+                }
+            }
+            function showToast(message, isAchievement = false) { 
+                const toast = document.getElementById('toast'); toast.innerHTML = message; 
+                if (isAchievement) { toast.classList.add('bg-yellow-500', 'font-bold'); toast.innerHTML = `<i class="fas fa-trophy mr-2"></i> ${message}`; }
+                toast.classList.remove('opacity-0', 'translate-y-10'); 
+                setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-10'); if(isAchievement) { toast.classList.remove('bg-yellow-500', 'font-bold'); } }, 4000); 
+            }
+            function triggerHapticFeedback(type = 'light') { if (navigator.vibrate) { const pattern = type === 'success' ? [100, 50, 100] : [10]; navigator.vibrate(pattern); } }
+            function setButtonState(button, state) { // 'default', 'loading', 'success'
+                if (!button) return;
+                button.classList.remove('loading', 'success');
+                if (state === 'loading' || state === 'success') {
+                    button.classList.add(state);
+                }
+            }
+            
+            async function handleSave(type, button) {
+                triggerHapticFeedback('light');
+                setButtonState(button, 'loading');
+
+                const timestampInput = document.getElementById(`${type}-timestamp-input`); 
+                const timestampStr = timestampInput ? timestampInput.value : '';
+                if (!timestampStr) { showToast("Por favor, selecione data e hora."); setButtonState(button, 'default'); return; }
+
+                const entry = { id: Date.now(), timestamp: new Date(timestampStr), type, rawData: {} };
+                const notesInput = document.getElementById(`${type}-notes-input`);
+                if (notesInput && notesInput.value.trim() !== '') { entry.rawData.notes = notesInput.value.trim(); }
+                
+                let validationPassed = true;
+                let aiPromise;
+
+                switch (type) {
+                    case 'glucose': const value = parseInt(document.getElementById('glucose-display-value').value); if (!value || value <= 0) { showToast("Valor de glicose inválido."); validationPassed = false; break; } const situation = document.getElementById('glucose-situation-select').value; entry.rawData = { ...entry.rawData, value, situation }; entry.value = `${value} mg/dL`; if (situation !== 'Geral') entry.value += ` (${situation})`; entry.icon = 'fa-tint'; entry.color = 'text-blue-500'; aiPromise = generateGlucoseInsight(entry); break;
+                    case 'insulin': 
+                        const doseValue = document.getElementById('insulin-display-value').value.replace(',', '.');
+                        const dose = parseFloat(doseValue); 
+                        const insulinType = document.querySelector('.insulin-type-btn.bg-purple-500').dataset.type; if (isNaN(dose) || dose < 0) { showToast("Dose de insulina inválida."); validationPassed = false; break; } entry.rawData = { ...entry.rawData, dose, insulinType }; entry.value = `${dose.toFixed(1)} un (${insulinType})`; entry.icon = 'fa-syringe'; entry.color = 'text-purple-500'; aiPromise = generateInsulinSuggestion(entry); break;
+                    case 'meal': const carbs = currentMeal.reduce((sum, item) => sum + (item.food.carbs * item.quantity), 0); if (carbs <= 0) { showToast("Nenhum item na refeição."); validationPassed = false; break; } const mealType = document.getElementById('meal-type-select').value; entry.rawData = { ...entry.rawData, carbs, items: currentMeal, mealType }; entry.value = `${mealType} - ${carbs.toFixed(1)}g carbs`; entry.icon = 'fa-utensils'; entry.color = 'text-green-500'; break;
+                    case 'activity': const duration = parseInt(document.getElementById('activity-display-value').value); if (!duration || duration < 0) { showToast("Duração da atividade inválida."); validationPassed = false; break; } entry.rawData = { ...entry.rawData, duration }; entry.value = `${duration} min`; entry.icon = 'fa-walking'; entry.color = 'text-orange-500'; aiPromise = generateActivityImpact(entry); break;
+                    case 'medication': const name = document.getElementById('medication-name-input').value.trim(); const medDose = document.getElementById('medication-dose-input').value.trim(); if (!name || !medDose) { showToast("Preencha o nome e a dosagem."); validationPassed = false; break; } entry.rawData = { ...entry.rawData, name, dose: medDose }; entry.value = `${name} - ${medDose}`; entry.icon = 'fa-pills'; entry.color = 'text-teal-500'; aiPromise = generateMedicationTip(entry); break;
+                    default: validationPassed = false;
+                }
+                
+                if (!validationPassed) { setButtonState(button, 'default'); return; }
+
+                appState.logHistory.push(entry); 
+                await saveState(); 
+                checkAndUnlockAchievements(); 
+                
+                if(aiPromise) await aiPromise;
+
+                setButtonState(button, 'success');
+                triggerHapticFeedback('success');
+                
+                setTimeout(() => {
+                    closeAllDetailModals();
+                    showToast('Registro salvo!');
+                    setTimeout(() => setButtonState(button, 'default'), 300);
+                }, 800);
+            }
+
+            function renderScreen(screenName) {
+                destroyCharts();
+                mainContent.innerHTML = screens[screenName](); mainContent.scrollTop = 0;
+                
+                if (screenName === 'dashboard') {
+                    const ctx = document.getElementById('glucoseChart')?.getContext('2d'); if (!ctx) return;
+                    const today = new Date().toDateString();
+                    const glucoseData = appState.logHistory.filter(e => e.type === 'glucose' && new Date(e.timestamp).toDateString() === today).sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).map(e => ({ value: e.rawData.value, time: new Date(e.timestamp).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}));
+                    activeCharts.dashboard = new Chart(ctx, { type: 'line', data: { labels: glucoseData.map(g => g.time), datasets: [{ data: glucoseData.map(g => g.value), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } } });
+                    generatePredictiveWarning();
+                } else if (screenName === 'analysis') {
+                    const weeklyBtn = document.getElementById('analysis-7d-btn');
+                    const monthlyBtn = document.getElementById('analysis-30d-btn');
+                    weeklyBtn.addEventListener('click', () => { 
+                        weeklyBtn.classList.replace('inactive-period-btn', 'active-period-btn');
+                        monthlyBtn.classList.replace('active-period-btn', 'inactive-period-btn');
+                        renderAnalysisCharts('7d');
+                    });
+                    monthlyBtn.addEventListener('click', () => { 
+                        monthlyBtn.classList.replace('inactive-period-btn', 'active-period-btn');
+                        weeklyBtn.classList.replace('active-period-btn', 'inactive-period-btn');
+                        renderAnalysisCharts('30d');
+                    });
+                    renderAnalysisCharts('7d');
+                } else if (screenName === 'reports') {
+                    const weeklyBtn = document.getElementById('report-weekly-btn'); const monthlyBtn = document.getElementById('report-monthly-btn');
+                    weeklyBtn.addEventListener('click', () => { 
+                        weeklyBtn.classList.replace('inactive-period-btn', 'active-period-btn');
+                        monthlyBtn.classList.replace('active-period-btn', 'inactive-period-btn');
+                        renderReportStats('weekly'); 
+                    });
+                    monthlyBtn.addEventListener('click', () => { 
+                        monthlyBtn.classList.replace('inactive-period-btn', 'active-period-btn');
+                        weeklyBtn.classList.replace('active-period-btn', 'inactive-period-btn');
+                        renderReportStats('monthly'); 
+                    });
+                    renderReportStats('weekly');
+                } else if (screenName === 'goals') {
+                    renderGoalsContent();
+                    generateGoalSuggestions();
+                }
+            }
+
+            function renderAnalysisCharts(period) {
+                destroyCharts();
+                const ctx = document.getElementById('tirChart')?.getContext('2d'); if(!ctx) return;
+                
+                const days = period === '7d' ? 7 : 30;
+                const startDate = new Date(); 
+                startDate.setDate(startDate.getDate() - days);
+
+                const glucoseLogs = appState.logHistory.filter(e => e.type === 'glucose' && new Date(e.timestamp) >= startDate);
+                let lows = 0, inRange = 0, highs = 0;
+                glucoseLogs.forEach(log => { const val = log.rawData.value; if (val < 70) lows++; else if (val <= 180) inRange++; else highs++; });
+                const total = lows + inRange + highs;
+                
+                if (total === 0) {
+                    ctx.font = "16px Inter";
+                    ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151';
+                    ctx.textAlign = "center";
+                    ctx.fillText("Sem dados para este período.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    return;
+                }
+
+                activeCharts.analysis = new Chart(ctx, { type: 'doughnut', data: { labels: [`Baixa (<70)`, `No Alvo (70-180)`, `Alta (>180)`], datasets: [{ data: [lows, inRange, highs], backgroundColor: ['#ef4444', '#22c55e', '#f59e0b'], borderWidth: 0 }]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } let value = context.raw; let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0; return `${label} ${value} leituras (${percentage}%)`; } } } } }});
+            }
+            
+            async function createChartImage(config, width = 600, height = 300) {
+                const offscreenCanvas = document.createElement('canvas');
+                offscreenCanvas.width = width;
+                offscreenCanvas.height = height;
+                const ctx = offscreenCanvas.getContext('2d');
+                
+                if(config.options) {
+                    config.options.animation = false;
+                    config.options.responsive = false;
+                    config.options.maintainAspectRatio = false;
+                } else {
+                    config.options = { animation: false, responsive: false, maintainAspectRatio: false };
+                }
+
+                const chart = new Chart(ctx, config);
+                
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const dataUrl = chart.toBase64Image();
+                        chart.destroy();
+                        resolve(dataUrl);
+                    }, 250); // Delay to ensure render is complete
+                });
+            }
+
+            async function generateFullAIReportText(startDate, endDate) {
+                const logsInPeriod = appState.logHistory.filter(log => new Date(log.timestamp) >= startDate && new Date(log.timestamp) <= endDate);
+
+                if (logsInPeriod.length < 10) {
+                    return "Dados insuficientes para um relatório detalhado da IA. Continue registrando suas atividades para obter análises completas.";
+                }
+
+                const glucoseLogs = logsInPeriod.filter(e => e.type === 'glucose');
+                const avgGlucose = glucoseLogs.length > 0 ? Math.round(glucoseLogs.reduce((a, b) => a + b.rawData.value, 0) / glucoseLogs.length) : 0;
+                let lows = 0, inRange = 0, highs = 0;
+                glucoseLogs.forEach(log => {
+                    const val = log.rawData.value;
+                    if (val < 70) lows++;
+                    else if (val <= 180) inRange++;
+                    else highs++;
+                });
+                const total = glucoseLogs.length;
+                const inRangePercent = total > 0 ? ((inRange / total) * 100).toFixed(0) : 0;
+
+                const dataSummary = `- Período: ${startDate.toLocaleDateString('pt-BR')} a ${endDate.toLocaleDateString('pt-BR')}\n- Glicemia Média: ${avgGlucose} mg/dL\n- Leituras no Alvo (70-180 mg/dL): ${inRangePercent}%\n- Eventos de Hipoglicemia (<70 mg/dL): ${lows}\n- Eventos de Hiperglicemia (>180 mg/dL): ${highs}`;
+
+                const prompt = `Você é um assistente de saúde especializado em diabetes. Analise o seguinte resumo de dados de um usuário e gere um relatório em português do Brasil. O relatório deve ser encorajador e fácil de entender. NÃO forneça conselhos médicos diretos, sempre sugira consultar um profissional de saúde. O relatório deve ter as seguintes seções, cada uma com um título em negrito: 1. **Resumo Geral:** Uma breve visão geral dos resultados. 2. **Pontos Positivos:** Elogie as tendências boas. 3. **Áreas de Foco:** Aponte áreas para melhoria de forma construtiva. 4. **Conclusão e Próximos Passos:** Uma mensagem final de incentivo. Aqui estão os dados:\n${dataSummary}`;
+
+                const systemPrompt = "Você cria relatórios de saúde claros e positivos baseados em dados, formatados com títulos em negrito. Você nunca dá conselhos médicos.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+                const reportText = await callGeminiAPI(payload, analysisApiKey);
+                return reportText || "Não foi possível gerar a análise da IA no momento.";
+            }
+
+            async function exportPdfReport(startDate, endDate){
+                const generateBtn = document.getElementById('generate-pdf-btn');
+                setButtonState(generateBtn, 'loading');
+                showToast("Gerando relatório com IA...");
+
+                const { jsPDF } = window.jspdf; 
+                const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const docWidth = doc.internal.pageSize.getWidth();
+                let y = 20;
+
+                doc.setFontSize(22);
+                doc.text("Relatório de Glicemia", docWidth / 2, y, { align: 'center' });
+                y += 15;
+                const userName = currentUser && !currentUser.isAnonymous && currentUser.displayName ? currentUser.displayName : `Usuário ID: ${currentUser.uid.substring(0,10)}...`;
+                doc.setFontSize(14); doc.text(userName, 15, y); y += 7;
+                doc.setFontSize(12);
+                const formattedStartDate = startDate.toLocaleDateString('pt-BR'); 
+                const formattedEndDate = endDate.toLocaleDateString('pt-BR'); 
+                doc.text(`Período: ${formattedStartDate} a ${formattedEndDate}`, 15, y); y += 15;
+                
+                const aiReportText = await generateFullAIReportText(startDate, endDate);
+                showToast("Análise da IA completa. Adicionando gráficos...");
+                
+                doc.setFontSize(16);
+                doc.text("Análise Inteligente do Período", 15, y); y += 8;
+                doc.setFontSize(11);
+                const splitText = doc.splitTextToSize(aiReportText.replace(/\*\*/g, ''), docWidth - 30);
+                doc.text(splitText, 15, y);
+                y += splitText.length * 5 + 10;
+
+                if (y > 180) { doc.addPage(); y = 20; }
+
+                const glucoseLogs = appState.logHistory.filter(e => e.type === 'glucose' && new Date(e.timestamp) >= startDate && new Date(e.timestamp) <= endDate).sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                if (glucoseLogs.length > 1) {
+                    const trendChartConfig = { type: 'line', data: { labels: glucoseLogs.map(g => new Date(g.timestamp).toLocaleDateString('pt-BR')), datasets: [{ label: 'Glicose (mg/dL)', data: glucoseLogs.map(g => g.rawData.value), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.1 }] }, options: { plugins: { title: { display: true, text: 'Tendência Glicêmica' } } } };
+                    const chartImage = await createChartImage(trendChartConfig, 800, 400);
+                    
+                    doc.setFontSize(16);
+                    doc.text("Gráfico de Tendência", 15, y); y += 8;
+                    doc.addImage(chartImage, 'PNG', 15, y, docWidth - 30, (docWidth - 30) / 2);
+                    y += ((docWidth - 30) / 2) + 10;
+                }
+
+                if (y > 250) { doc.addPage(); y = 20; }
+                doc.setFontSize(16);
+                doc.text("Registros Detalhados", 15, y); y += 8;
+                const logsInPeriod = appState.logHistory.filter(log => { const logDate = new Date(log.timestamp); return logDate >= startDate && logDate <= endDate; });
+                logsInPeriod.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).forEach(log => {
+                    if (y > 280) { doc.addPage(); y = 20; }
+                    doc.setFontSize(10); 
+                    let text = `${new Date(log.timestamp).toLocaleString('pt-BR')} - ${log.type}: ${log.value}`; 
+                    if(log.rawData.notes) { text += ` (Nota: ${log.rawData.notes})` }
+                    const wrappedText = doc.splitTextToSize(text, docWidth - 30);
+                    doc.text(wrappedText, 15, y); 
+                    y += wrappedText.length * 4 + 2;
+                });
+
+                doc.save(`Relatorio_Diabetes_${formattedStartDate}_a_${formattedEndDate}.pdf`); 
+                showToast("Relatório PDF exportado com sucesso!");
+                setButtonState(generateBtn, 'default');
+                closeModal('#report-date-modal');
+            }
+
+
+            function updateMealSummary() {
+                const mealItemsContainer = document.getElementById('current-meal-items');
+                const totalCarbsEl = document.getElementById('total-carbs');
+                if (!mealItemsContainer || !totalCarbsEl) return;
+                
+                const totalCarbs = currentMeal.reduce((sum, item) => sum + (item.food.carbs * item.quantity), 0);
+
+                if (currentMeal.length === 0) {
+                    mealItemsContainer.innerHTML = '<p class="text-xs text-center">Nenhum item adicionado.</p>';
+                } else {
+                    mealItemsContainer.innerHTML = currentMeal.map((item, index) => `
+                        <div class="flex justify-between items-center p-1 bg-white/10 rounded-lg">
+                            <span class="flex-1">${item.food.name} (${item.food.carbs.toFixed(1)}g)</span>
+                            <div class="flex items-center">
+                                <span class="mx-2">Qtd:</span>
+                                <input type="number" value="${item.quantity}" class="quantity-input w-12 text-center border-white/20 rounded px-1 bg-transparent" data-index="${index}" step="0.5" min="0.5">
+                                <button class="delete-meal-item-btn text-red-400 hover:text-red-600 ml-2 w-6 h-6" data-index="${index}"><i class="fas fa-times-circle"></i></button>
+                            </div>
+                        </div>`).join('');
+                }
+                totalCarbsEl.textContent = `${totalCarbs.toFixed(1)}g`;
+                document.getElementById('bolus-carbs-input').value = totalCarbs.toFixed(1);
+            }
+            
+            async function callGeminiAPI(payload, apiKey) {
+                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                 try {
+                   const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                   if (!response.ok) {
+                       const errorData = await response.json();
+                       console.error("Detalhe do Erro da API:", errorData);
+                       throw new Error(`Erro da API: ${response.statusText} - ${errorData.error?.message}`);
+                   }
+                   const result = await response.json();
+                   return result.candidates?.[0]?.content?.parts?.[0]?.text;
+                 } catch (error) {
+                   console.error("Erro na chamada da API Gemini:", error);
+                   return null;
+                 }
+            }
+            
+            async function generateAIAnalysis(base64ImageData = null) {
+                const resultContainer = base64ImageData ? document.getElementById('ai-photo-analysis-section') : document.getElementById('ai-analysis-result');
+                const generateBtn = document.getElementById('generate-ai-analysis-btn');
+                if (!resultContainer) return;
+
+                triggerHapticFeedback('light');
+                resultContainer.innerHTML = `<div class="flex flex-col items-center p-4"><div class="loader"></div><p class="text-sm mt-2 screen-subtitle">Analisando...</p></div>`;
+                if(generateBtn) setButtonState(generateBtn, 'loading');
+                if(base64ImageData) resultContainer.classList.remove('hidden');
+                
+                const apiKey = base64ImageData ? cameraApiKey : analysisApiKey;
+                
+                let payload;
+                if (base64ImageData) { 
+                    const userQuery = "Analise a refeição nesta imagem. Descreva os alimentos que você vê e forneça uma estimativa do total de carboidratos em gramas. Formate sua resposta como: 'Estimativa de Carboidratos: [número]g\n\nAlimentos identificados:\n- [Alimento 1]\n- [Alimento 2]'"; 
+                    const systemPrompt = "Você é um assistente de nutrição que analisa imagens de alimentos para estimar carboidratos. Suas respostas devem ser concisas e seguir o formato solicitado. Não forneça conselhos médicos."; 
+                    payload = { contents: [{ parts: [ { text: userQuery }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], systemInstruction: { parts: [{ text: systemPrompt }] }, }; 
+                } else { 
+                    const activePeriodBtn = document.querySelector('#analysis-7d-btn.active-period-btn, #analysis-30d-btn.active-period-btn');
+                    const days = activePeriodBtn && activePeriodBtn.id.includes('30d') ? 30 : 7;
+                    const startDate = new Date(); startDate.setDate(startDate.getDate() - days); 
+
+                    const recentLogs = appState.logHistory.filter(log => new Date(log.timestamp) >= startDate); 
+                    if (recentLogs.length < 5) { resultContainer.innerHTML = '<p>São necessários mais dados para uma análise significativa.</p>'; if(generateBtn) setButtonState(generateBtn, 'default'); return; } 
+                    const formattedData = recentLogs.map(log => `${new Date(log.timestamp).toLocaleString('pt-BR')} - ${log.type}: ${log.value}${log.rawData.notes ? ` (Nota: ${log.rawData.notes})` : ''}`).join('\n'); 
+                    const userQuery = `Analise os seguintes dados de um diário de diabetes dos últimos ${days} dias. Forneça 2 a 3 insights curtos e acionáveis em português do Brasil. Identifique possíveis correlações entre refeições, insulina, atividades e os níveis de glicose. Não forneça conselhos médicos. Seja um assistente prestativo, não um médico. Os dados são:\n\n${formattedData}`; 
+                    const systemPrompt = "Você é um assistente que analisa dados de diabetes para encontrar padrões. Suas respostas devem ser claras, concisas e como uma lista de pontos. Sempre inclua um lembrete para consultar um médico."; 
+                    payload = { contents: [{ parts: [{ text: userQuery }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, }; 
+                }
+                
+                try {
+                    const text = await callGeminiAPI(payload, apiKey);
+                    if (text) {
+                        if (base64ImageData) { const carbMatch = text.match(/Estimativa de Carboidratos:.*?(\d+\.?\d*)/i); const estimatedCarbs = carbMatch ? parseFloat(carbMatch[1]) : 0; resultContainer.innerHTML = `<div class="glass-effect p-3 rounded-lg"><p class="text-sm screen-title">${text.replace(/\n/g, '<br>')}</p>${estimatedCarbs > 0 ? `<button id="use-ai-carbs-btn" data-carbs="${estimatedCarbs}" class="mt-3 w-full bg-green-500 text-white font-bold py-2 px-3 rounded-lg hover:bg-green-600 transition text-sm">Usar esta estimativa de ${estimatedCarbs}g</button>` : ''}</div>`; } 
+                        else { resultContainer.innerHTML = text.replace(/\*/g, '<br>• '); }
+                    } else { throw new Error("Resposta da IA inválida."); }
+                } catch(error) { 
+                    console.error("Erro na Análise de IA:", error); 
+                    resultContainer.innerHTML = '<p class="text-red-500">Ocorreu um erro ao gerar a análise. Verifique sua chave de API e a conexão.</p>'; 
+                } finally { 
+                    if(generateBtn) setButtonState(generateBtn, 'default');
+                }
+            }
+
+            async function generatePredictiveWarning() {
+                const warningContainer = document.getElementById('ai-predictive-warning');
+                if (!warningContainer || appState.logHistory.length < 2) return;
+
+                const recentLogs = appState.logHistory.slice(-3).map(log => `${log.type}: ${log.value}`).join(', ');
+                const prompt = `Analise estes 3 registros recentes de diabetes: ${recentLogs}. Há alguma tendência preocupante imediata (ex: carboidratos altos sem insulina, ou baixa glicose com exercício recente)? Se sim, forneça um aviso amigável de uma frase em português. Se não, responda "N/A".`;
+                const systemPrompt = "Você é um assistente de IA que detecta riscos imediatos em dados de diabetes. Responda apenas com o aviso ou 'N/A'. Seja muito breve.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+                const warning = await callGeminiAPI(payload, analysisApiKey);
+                if (warning && !warning.includes("N/A")) {
+                    warningContainer.innerHTML = `<p class="text-sm screen-title flex items-center"><i class="fas fa-exclamation-triangle text-yellow-400 mr-2"></i> ${warning}</p>`;
+                    warningContainer.classList.remove('hidden');
+                } else {
+                    warningContainer.classList.add('hidden');
+                }
+            }
+
+            async function generateGoalSuggestions() {
+                const container = document.getElementById('ai-goal-suggestions');
+                const button = document.getElementById('generate-goal-suggestion-btn');
+                if (!container || !button) return;
+                
+                setButtonState(button, 'loading');
+                container.innerHTML = `<div class="flex justify-center p-2"><div class="loader !w-6 !h-6 !border-4"></div></div>`;
+                
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const recentLogs = appState.logHistory.filter(log => new Date(log.timestamp) >= oneWeekAgo);
+                if (recentLogs.length < 5) {
+                    container.innerHTML = '<p>Registre mais dados para receber sugestões.</p>';
+                    setButtonState(button, 'default');
+                    return;
+                }
+                const formattedData = recentLogs.map(log => `${log.type}: ${log.value}`).join('\n');
+                
+                const prompt = `Com base nestes dados de diabetes da última semana, sugira 2 metas pequenas e alcançáveis. Ex: "Tente uma caminhada de 10 min após o jantar" ou "Mantenha a glicemia em jejum abaixo de 130 por 3 dias". Dados: \n${formattedData}`;
+                const systemPrompt = "Você é um coach de saúde que sugere metas. Responda apenas com os dois itens sugeridos, começando cada um com '• ' e separados por uma nova linha.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                
+                const suggestions = await callGeminiAPI(payload, analysisApiKey);
+                if (suggestions) {
+                    container.innerHTML = suggestions.split('\n').map(s => `<p>${s}</p>`).join('');
+                } else {
+                    container.innerHTML = '<p>Não foi possível gerar sugestões agora.</p>';
+                }
+                setButtonState(button, 'default');
+            }
+
+            async function generateReportSummaryAI(period) {
+                const container = document.getElementById('ai-report-summary');
+                if (!container) return;
+                container.innerHTML = `<div class="flex justify-center p-4"><div class="loader"></div></div>`;
+
+                const days = period === 'weekly' ? 7 : 30;
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+
+                const logsInPeriod = appState.logHistory.filter(log => {
+                    const logDate = new Date(log.timestamp);
+                    return logDate >= startDate && logDate <= endDate;
+                });
+
+                if (logsInPeriod.length < 10) {
+                    container.innerHTML = `<p class="text-center screen-subtitle text-sm">Dados insuficientes para um resumo da IA. Continue registrando!</p>`;
+                    return;
+                }
+
+                const formattedData = logsInPeriod.map(log => `${log.type}: ${log.value}`).join(', ');
+                const prompt = `Analise os dados de diabetes do último ${days} dias: ${formattedData}. Escreva um resumo de 2-3 frases em português, destacando uma tendência positiva e uma área para focar, de forma encorajadora.`;
+                const systemPrompt = "Você é um coach de diabetes que fornece resumos de relatórios. Seja positivo, conciso e nunca dê conselhos médicos. Termine com 'Continue o ótimo trabalho!'";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+                const summary = await callGeminiAPI(payload, analysisApiKey);
+                if (summary) {
+                    container.innerHTML = `<h3 class="font-bold screen-title mb-2">Resumo da IA</h3><p class="text-sm screen-subtitle">${summary}</p>`;
+                } else {
+                    container.innerHTML = `<p class="text-center screen-subtitle text-sm">Não foi possível gerar o resumo da IA no momento.</p>`;
+                }
+            }
+
+            async function generateGlucoseInsight(entry) {
+                const container = document.getElementById('ai-glucose-insight');
+                if (!container) return;
+                const prompt = `Um usuário registrou uma glicemia de ${entry.rawData.value} mg/dL na situação "${entry.rawData.situation}". Forneça um insight muito breve (1 frase) sobre este valor. Ex: "Este valor está dentro da meta." ou "Um pouco alto, vale observar o que comeu antes."`;
+                const systemPrompt = "Você é um assistente de diabetes. Dê insights curtos e não-médicos.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const insight = await callGeminiAPI(payload, analysisApiKey);
+                if (insight) {
+                    container.textContent = insight;
+                    container.classList.remove('hidden');
+                }
+            }
+            
+            async function generateInsulinSuggestion(entry) {
+                const container = document.getElementById('ai-insulin-suggestion');
+                if (!container) return;
+                const prompt = `Um usuário registrou ${entry.rawData.dose} unidades de insulina ${entry.rawData.insulinType}. Forneça uma dica útil e curta relacionada. Ex: "Lembre-se de fazer o rodízio dos locais de aplicação."`;
+                const systemPrompt = "Você é um assistente de diabetes. Dê dicas curtas e não-médicas.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const suggestion = await callGeminiAPI(payload, analysisApiKey);
+                if (suggestion) {
+                    container.textContent = suggestion;
+                    container.classList.remove('hidden');
+                }
+            }
+            
+            async function generateActivityImpact(entry) {
+                const container = document.getElementById('ai-activity-impact');
+                if (!container) return;
+                const prompt = `Um usuário registrou ${entry.rawData.duration} minutos de atividade. Descreva o benefício geral disso para a glicemia em uma frase curta.`;
+                const systemPrompt = "Você é um coach de saúde. Dê frases curtas e motivacionais.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const impact = await callGeminiAPI(payload, analysisApiKey);
+                if (impact) {
+                    container.textContent = impact;
+                    container.classList.remove('hidden');
+                }
+            }
+
+            async function generateMedicationTip(entry) {
+                const container = document.getElementById('ai-medication-tip');
+                if (!container) return;
+                const prompt = `Um usuário registrou o medicamento ${entry.rawData.name}. Dê uma dica geral e curta sobre adesão a medicamentos.`;
+                const systemPrompt = "Você é um assistente de saúde. Dê dicas curtas e não-médicas.";
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const tip = await callGeminiAPI(payload, analysisApiKey);
+                if (tip) {
+                    container.textContent = tip;
+                    container.classList.remove('hidden');
+                }
+            }
+
+            async function generateBolusTuningSuggestion() {
+                const container = document.getElementById('ai-bolus-tuning');
+                if (!container) return;
+                
+                const postMealLogs = appState.logHistory.filter(log => log.type === 'glucose' && log.rawData.situation && log.rawData.situation.startsWith('Depois d'));
+                if (postMealLogs.length < 3) return;
+
+                const highs = postMealLogs.filter(log => log.rawData.value > 180).length;
+                if (highs / postMealLogs.length > 0.6) { // Se mais de 60% das medições pós-refeição são altas
+                    const prompt = "Os dados de um usuário mostram que a maioria das suas glicemias pós-refeição estão acima de 180. Crie uma mensagem curta sugerindo que talvez seja uma boa ideia conversar com o médico sobre os fatores de cálculo de insulina, sem dar conselhos diretos.";
+                    const systemPrompt = "Você é um assistente de diabetes. Alerte o usuário sobre padrões e sempre recomende falar com um médico.";
+                    const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                    const suggestion = await callGeminiAPI(payload, analysisApiKey);
+                    if (suggestion) {
+                        container.textContent = suggestion;
+                        container.classList.remove('hidden');
+                    }
+                }
+            }
+
+            function renderMedicationSelection() {
+                const container = document.getElementById('medication-list-container');
+                if (!container) return;
+                const medications = userSettings.medications || [];
+                if (medications.length > 0) {
+                    container.innerHTML = '<label class="screen-subtitle mb-1 block text-sm">Selecionar da sua lista</label>' + medications.map(med => 
+                        `<button class="medication-select-btn w-full text-left p-2 glass-effect rounded-lg mb-2">${med.name} - ${med.dose}</button>`
+                    ).join('');
+                } else {
+                    container.innerHTML = '';
+                }
+            }
+            
+            const achievements = [ { id: 'first_log', title: 'Primeiro Passo', description: 'Faça o seu primeiro registro.', icon: 'fa-shoe-prints', check: (state) => state.logHistory.length >= 1 }, { id: 'first_glucose', title: 'Medição Inicial', description: 'Registre sua glicemia pela primeira vez.', icon: 'fa-tint', check: (state) => state.logHistory.some(log => log.type === 'glucose')}, { id: 'first_meal', title: 'Bom Apetite', description: 'Registre sua primeira refeição.', icon: 'fa-utensils', check: (state) => state.logHistory.some(log => log.type === 'meal') }, { id: 'consistent_log_3_days', title: 'Criando Hábito', description: 'Registre por 3 dias seguidos.', icon: 'fa-calendar-check', check: (state) => hasConsecutiveDays(state.logHistory, 3) }, { id: 'consistent_log_7_days', title: 'Firme e Forte', description: 'Registre por 7 dias seguidos.', icon: 'fa-award', check: (state) => hasConsecutiveDays(state.logHistory, 7) }, { id: 'first_custom_food', title: 'Chef de Cozinha', description: 'Adicione seu primeiro alimento personalizado.', icon: 'fa-plus-circle', check: (state, settings) => (settings.customFoods || []).length > 0 }, { id: 'use_bolus_calculator', title: 'Matemático', description: 'Use a calculadora de bolus.', icon: 'fa-calculator', check: (state) => state.logHistory.some(log => log.rawData.notes === 'Calculado via Calculadora de Bolus')} ];
+            function hasConsecutiveDays(logHistory, days) { if (logHistory.length < days) return false; const uniqueDays = [...new Set(logHistory.map(log => new Date(log.timestamp).toDateString()))]; if (uniqueDays.length < days) return false; const sortedDays = uniqueDays.map(d => new Date(d)).sort((a,b) => b - a); for (let i = 0; i < days - 1; i++) { const diff = (sortedDays[i] - sortedDays[i+1]) / (1000 * 60 * 60 * 24); if (diff !== 1) return false; } return true; }
+            function checkAndUnlockAchievements() { achievements.forEach(ach => { if (!(userSettings.unlockedAchievements || []).includes(ach.id)) { if (ach.check(appState, userSettings)) { if(!userSettings.unlockedAchievements) { userSettings.unlockedAchievements = []}; userSettings.unlockedAchievements.push(ach.id); showToast(`Conquista: ${ach.title}`, true); } } }); }
+            function renderGoalsContent() {
+                const goalsContainer = document.getElementById('goals-content'); if(!goalsContainer) return;
+                goalsContainer.innerHTML = achievements.map(ach => {
+                    const isUnlocked = (userSettings.unlockedAchievements || []).includes(ach.id);
+                    return `<div class="flex items-center p-4 rounded-2xl glass-effect ${isUnlocked ? '' : 'opacity-60'}"> <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4 ${isUnlocked ? 'bg-yellow-400/20' : 'bg-gray-200/20'}"> <i class="fas ${ach.icon} text-2xl ${isUnlocked ? 'text-yellow-400' : 'text-gray-400 dark:text-gray-500'}"></i> </div> <div class="flex-1"> <p class="font-bold screen-title">${ach.title}</p> <p class="text-sm screen-subtitle">${ach.description}</p> </div> </div>`;
+                }).join('');
+            }
+
+            document.body.addEventListener('click', (e) => {
+                const target = e.target;
+
+                const navItem = target.closest('.nav-item');
+                if (navItem) {
+                    triggerHapticFeedback('light');
+                    if (navItem.classList.contains('active')) return;
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    const screen = navItem.dataset.screen;
+                    document.querySelectorAll(`.nav-item[data-screen="${screen}"]`).forEach(i => i.classList.add('active'));
+                    renderScreen(screen);
+                }
+
+                if (target.closest('#sign-out-btn')) { triggerHapticFeedback('light'); signOut(auth).catch(error => console.error("Erro ao sair:", error)); }
+                if (target.closest('#log-button') || target.closest('#desktop-log-button')) openModal('#log-modal');
+                const closeModalBtn = target.closest('#close-modal-btn, #close-bolus-modal-btn, #close-date-modal-btn'); if (closeModalBtn) { const modal = closeModalBtn.closest('.modal-backdrop, .fixed.inset-0'); if (modal) { closeModal('#' + modal.id); } }
+                const logOption = target.closest('.log-option'); if (logOption) { const modalId = logOption.dataset.modal; if (modalId === 'bolus-calculator-modal') { openModal('#' + modalId); } else { openDetailModal(modalId); } closeModal('#log-modal'); }
+                const insulinTypeBtn = target.closest('.insulin-type-btn'); if (insulinTypeBtn) { triggerHapticFeedback('light'); document.querySelectorAll('.insulin-type-btn').forEach(b => {b.classList.remove('bg-purple-500', 'text-white', 'border-purple-500'); b.classList.add('dark:border-gray-600', 'text-gray-700', 'dark:text-gray-200'); }); insulinTypeBtn.classList.add('bg-purple-500', 'text-white', 'border-purple-500'); insulinTypeBtn.classList.remove('dark:border-gray-600', 'text-gray-700', 'dark:text-gray-200'); }
+                if(target.closest('.close-detail-modal-btn')) closeAllDetailModals();
+                const saveBtn = target.closest('.save-btn'); if (saveBtn) handleSave(saveBtn.dataset.type, saveBtn);
+                const saveSettingsBtn = target.closest('#save-settings-btn'); if(saveSettingsBtn) handleSaveSettings(saveSettingsBtn);
+                if (target.closest('#generate-goal-suggestion-btn')) { generateGoalSuggestions(); }
+
+                const medSelectBtn = target.closest('.medication-select-btn');
+                if (medSelectBtn) {
+                    const [name, dose] = medSelectBtn.textContent.split(' - ');
+                    document.getElementById('medication-name-input').value = name;
+                    document.getElementById('medication-dose-input').value = dose;
+                }
+
+                if (target.closest('.delete-btn')) { triggerHapticFeedback('light'); const logId = parseInt(target.closest('.delete-btn').dataset.logId); appState.logHistory = appState.logHistory.filter(log => log.id !== logId); saveState(); showToast('Registro apagado!'); }
+                if(target.closest('#calculate-bolus-btn')) {
+                    triggerHapticFeedback('light'); const bg = parseFloat(document.getElementById('bolus-bg-input').value); const carbs = parseFloat(document.getElementById('bolus-carbs-input').value) || 0; if (!bg) return showToast('Insira a glicemia atual.');
+                    const period = getMealPeriod(); const { carbRatio, sensitivityFactor } = userSettings.calculationSettings[period]; const mealBolus = carbs > 0 ? carbs / carbRatio : 0; const correctionBolus = Math.max(0, (bg - userSettings.targetBg) / sensitivityFactor); const totalBolus = mealBolus + correctionBolus;
+                    document.getElementById('bolus-meal-result').textContent = `${mealBolus.toFixed(1)} un`; document.getElementById('bolus-correction-result').textContent = `${correctionBolus.toFixed(1)} un`; document.getElementById('bolus-total-result').textContent = `${totalBolus.toFixed(1)} un`; document.getElementById('bolus-result-section').classList.remove('hidden'); if (totalBolus > 0) { document.getElementById('apply-and-log-bolus-btn').disabled = false; }
+                }
+                const applyAndLogBtn = target.closest('#apply-and-log-bolus-btn'); if (applyAndLogBtn && !applyAndLogBtn.disabled) { triggerHapticFeedback('light'); const totalDose = parseFloat(document.getElementById('bolus-total-result').textContent); appState.logHistory.push({ id: Date.now(), timestamp: new Date(), type: 'insulin', value: `${totalDose.toFixed(1)} un (Bolus (Lispro))`, icon: 'fa-syringe', color: 'text-purple-500', rawData: { dose: totalDose, insulinType: 'Bolus (Lispro)', notes: 'Calculado via Calculadora de Bolus' }}); checkAndUnlockAchievements(); saveState(); closeModal('#bolus-calculator-modal'); showToast('Dose de Bolus registrada!'); }
+                const exportPdfBtn = target.closest('#export-pdf-btn'); if (exportPdfBtn) { triggerHapticFeedback('light'); const endDateInput = document.getElementById('end-date'); const startDateInput = document.getElementById('start-date'); const today = new Date(); endDateInput.value = today.toISOString().split('T')[0]; const oneMonthAgo = new Date(); oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1); startDateInput.value = oneMonthAgo.toISOString().split('T')[0]; openModal('#report-date-modal'); }
+                const generatePdfBtn = target.closest('#generate-pdf-btn'); if (generatePdfBtn) { triggerHapticFeedback('light'); const startDateStr = document.getElementById('start-date').value; const endDateStr = document.getElementById('end-date').value; if (!startDateStr || !endDateStr) { showToast("Selecione as duas datas."); return; } const startDate = new Date(startDateStr + 'T00:00:00'); const endDate = new Date(endDateStr + 'T23:59:59'); if (startDate > endDate) { showToast("Data de início inválida."); return; } exportPdfReport(startDate, endDate); }
+                if (target.closest('#generate-ai-analysis-btn')) { generateAIAnalysis(); }
+                if (target.closest('#generate-dashboard-insight-btn')) { generateDashboardInsight(target.closest('button')); }
+                if (target.closest('#photo-meal-btn')) { document.getElementById('meal-photo-input').click(); }
+                if (target.closest('#use-ai-carbs-btn')) { const carbs = parseFloat(target.dataset.carbs); const aiFood = { id: 'ai_' + Date.now(), name: 'Refeição da Foto (IA)', portion: '1 prato', carbs: carbs }; currentMeal.push({ food: aiFood, quantity: 1 }); updateMealSummary(); showToast(`${carbs}g de carboidratos adicionados!`); document.getElementById('ai-photo-analysis-section').classList.add('hidden'); }
+                if (target.closest('#add-med-btn')) {
+                    const name = document.getElementById('new-med-name').value.trim();
+                    const dose = document.getElementById('new-med-dose').value.trim();
+                    if(name && dose) {
+                        userSettings.medications = userSettings.medications || [];
+                        userSettings.medications.push({name, dose});
+                        saveState().then(() => renderScreen('profile'));
+                    }
+                }
+                const deleteMedBtn = target.closest('.delete-med-btn');
+                if (deleteMedBtn) {
+                    const index = parseInt(deleteMedBtn.dataset.index);
+                    userSettings.medications.splice(index, 1);
+                    saveState().then(() => renderScreen('profile'));
+                }
+                const deleteMealItemBtn = target.closest('.delete-meal-item-btn');
+                if (deleteMealItemBtn) {
+                    const index = parseInt(deleteMealItemBtn.dataset.index);
+                    currentMeal.splice(index, 1);
+                    updateMealSummary();
+                }
+            });
+            
+            detailModalsContainer.addEventListener('click', (e) => {
+                if (e.target === detailModalsContainer) {
+                    closeAllDetailModals();
+                }
+            });
+
+            async function handleSaveSettings(button) {
+                setButtonState(button, 'loading');
+                triggerHapticFeedback('light'); 
+                
+                userSettings.diabetesProfile = userSettings.diabetesProfile || {};
+                userSettings.diabetesProfile.type = document.getElementById('setting-diabetes-type').value;
+                userSettings.diabetesProfile.diagnosisDate = document.getElementById('setting-diagnosis-date').value;
+                userSettings.diabetesProfile.weight = parseFloat(document.getElementById('setting-weight').value) || userSettings.diabetesProfile.weight;
+                userSettings.diabetesProfile.height = parseFloat(document.getElementById('setting-height').value) || userSettings.diabetesProfile.height;
+                
+                userSettings.emergencyContact = userSettings.emergencyContact || {};
+                userSettings.emergencyContact.name = document.getElementById('setting-emergency-name').value;
+                userSettings.emergencyContact.phone = document.getElementById('setting-emergency-phone').value;
+                userSettings.emergencyContact.notes = document.getElementById('setting-emergency-notes').value;
+                
+                userSettings.targetBg = parseInt(document.getElementById('setting-targetBg').value) || userSettings.targetBg;
+                userSettings.calculationSettings.morning.carbRatio = parseInt(document.getElementById('setting-carbRatio-morning').value) || 15; 
+                userSettings.calculationSettings.morning.sensitivityFactor = parseInt(document.getElementById('setting-sensitivityFactor-morning').value) || 50; 
+                userSettings.calculationSettings.afternoon.carbRatio = parseInt(document.getElementById('setting-carbRatio-afternoon').value) || 15; 
+                userSettings.calculationSettings.afternoon.sensitivityFactor = parseInt(document.getElementById('setting-sensitivityFactor-afternoon').value) || 50; 
+                userSettings.calculationSettings.night.carbRatio = parseInt(document.getElementById('setting-carbRatio-night').value) || 15; 
+                userSettings.calculationSettings.night.sensitivityFactor = parseInt(document.getElementById('setting-sensitivityFactor-night').value) || 50;
+                
+                await saveState();
+                setButtonState(button, 'success');
+                triggerHapticFeedback('success');
+                setTimeout(() => {
+                    showToast('Configurações salvas!');
+                    setButtonState(button, 'default');
+                }, 1000);
+            }
+
+            document.body.addEventListener('input', (e) => {
+                const target = e.target;
+                if (target.id === 'food-search-input') {
+                    clearTimeout(foodSearchTimeout);
+                    const term = target.value.trim();
+                    const searchResultsContainer = document.getElementById('search-results');
+                    if (term.length < 3) {
+                        searchResultsContainer.innerHTML = '';
+                        return;
+                    }
+                    searchResultsContainer.innerHTML = `<div class="flex justify-center items-center p-4"><div class="loader !w-6 !h-6 !border-4"></div></div>`;
+                    foodSearchTimeout = setTimeout(() => {
+                        handleAIFoodSearch(term);
+                    }, 1000); // Debounce
+                } else if (target.classList.contains('quantity-input')) { const index = parseInt(target.dataset.index); const newQuantity = parseFloat(target.value); if (!isNaN(newQuantity) && newQuantity >= 0 && index < currentMeal.length) { currentMeal[index].quantity = newQuantity; updateMealSummary(); } }
+            });
+
+            async function handleAIFoodSearch(term) {
+                const searchResultsContainer = document.getElementById('search-results');
+                const systemInstruction = "Você é um assistente de nutrição. Analise a refeição que o usuário descreveu. Decomponha-a em seus principais ingredientes/componentes. Para cada componente, estime uma porção razoável e a quantidade de carboidratos em gramas. Responda APENAS com um array de objetos JSON. Cada objeto deve ter as chaves 'name' (string), 'portion' (string) e 'carbs' (number). Não inclua nada além do array JSON na sua resposta.";
+                
+                const payload = {
+                    contents: [{ parts: [{ text: term }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "portion": { "type": "STRING" }, "carbs": { "type": "NUMBER" } }, required: ["name", "portion", "carbs"] } }
+                    }
+                };
+
+                const text = await callGeminiAPI(payload, analysisApiKey);
+
+                if (!text) {
+                    searchResultsContainer.innerHTML = '<p class="text-center screen-subtitle text-sm p-4">Não foi possível analisar a refeição. Tente novamente.</p>';
+                    return;
+                }
+
+                try {
+                    const results = JSON.parse(text);
+                    if (results && results.length > 0) {
+                        searchResultsContainer.innerHTML = `<button id="add-all-foods-btn" class="w-full bg-green-500 text-white font-bold py-2 px-3 rounded-lg hover:bg-green-600 transition text-sm mb-2">Adicionar todos os ${results.length} itens</button>`;
+                        results.forEach(food => {
+                            const foodItem = { ...food, id: 'ai_' + Date.now() + Math.random() };
+                            const item = document.createElement('div');
+                            item.className = 'p-3 border-b border-white/10 flex justify-between items-center';
+                            item.innerHTML = `
+                                <div class="flex-1">
+                                    <p class="font-semibold screen-title">${foodItem.name}</p>
+                                    <p class="text-xs screen-subtitle">${foodItem.portion} - ${foodItem.carbs}g carbs</p>
+                                </div>
+                                <button class="add-food-item-btn bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-purple-600 transition"><i class="fas fa-plus"></i></button>`;
+                            
+                            item.querySelector('.add-food-item-btn').onclick = () => {
+                                triggerHapticFeedback('light');
+                                currentMeal.push({ food: foodItem, quantity: 1 });
+                                updateMealSummary();
+                                item.classList.add('opacity-50', 'pointer-events-none');
+                            };
+                            searchResultsContainer.appendChild(item);
+                        });
+
+                        document.getElementById('add-all-foods-btn').onclick = () => {
+                            triggerHapticFeedback('light');
+                            results.forEach(food => {
+                                currentMeal.push({ food: { ...food, id: 'ai_' + Date.now() + Math.random() }, quantity: 1 });
+                            });
+                            updateMealSummary();
+                            searchResultsContainer.innerHTML = '<p class="text-center text-green-500 font-semibold p-4">Todos os itens foram adicionados!</p>';
+                        };
+
+                    } else {
+                         searchResultsContainer.innerHTML = '<p class="text-center screen-subtitle text-sm p-4">Nenhum alimento identificado. Tente ser mais específico.</p>';
+                    }
+                } catch(e) {
+                    console.error("Erro ao parsear JSON da busca de alimentos:", e, "Resposta recebida:", text);
+                    searchResultsContainer.innerHTML = '<p class="text-center screen-subtitle text-sm p-4">Erro ao processar a resposta. Tente novamente.</p>';
+                }
+            }
+
+            async function generateDashboardInsight(button) {
+                const resultContainer = document.getElementById('dashboard-insight-result');
+                setButtonState(button, 'loading');
+                resultContainer.innerHTML = '';
+
+                const today = new Date().toDateString();
+                const logsToday = appState.logHistory.filter(entry => new Date(entry.timestamp).toDateString() === today);
+
+                if (logsToday.length < 2) {
+                    resultContainer.innerHTML = '<p>Registre mais atividades hoje para receber um insight.</p>';
+                    setButtonState(button, 'default');
+                    return;
+                }
+                
+                const formattedData = logsToday.map(log => `${new Date(log.timestamp).toLocaleTimeString('pt-BR')} - ${log.type}: ${log.value}`).join('\n');
+                const systemInstruction = "Você é um assistente de diabetes amigável. Analise os registros do diário de hoje. Forneça um insight curto, positivo e útil em uma única frase (máximo 20 palavras). Foco em correlações simples e encorajamento. Não dê conselhos médicos diretos. Seja breve e direto.";
+                const prompt = `Registros de hoje:\n${formattedData}`;
+                const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } };
+
+                const insight = await callGeminiAPI(payload, analysisApiKey);
+                
+                if(insight) {
+                    resultContainer.innerHTML = `<p>${insight}</p>`;
+                } else {
+                    resultContainer.innerHTML = `<p>Não foi possível gerar um insight no momento.</p>`;
+                }
+                setButtonState(button, 'default');
+            }
+            
+            document.getElementById('meal-photo-input').addEventListener('change', function(event) {
+                const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64String = e.target.result.replace("data:", "").replace(/^.+,/, "");
+                    const analysisSection = document.getElementById('ai-photo-analysis-section');
+                    analysisSection.innerHTML = `<div class="flex flex-col items-center p-4"><img src="${e.target.result}" alt="[Imagem da refeição]" class="rounded-lg max-h-40 mb-3"><div class="loader"></div><p class="text-sm mt-2 screen-subtitle">Analisando imagem...</p></div>`; analysisSection.classList.remove('hidden');
+                    generateAIAnalysis(base64String);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.body.addEventListener('change', e => { if (e.target.id === 'theme-toggle') { triggerHapticFeedback('light'); toggleTheme(); } });
+            function updateTime() { timeEl.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+
+            function createSlider(containerId, options) {
+                const container = document.getElementById(containerId); if (!container) return; 
+                const display = container.querySelector('.slider-value-display'); 
+                const track = container.querySelector('.slider-track'); 
+                const thumb = container.querySelector('.slider-thumb'); 
+                let isDragging = false; 
+                const { min, max, step, initial, format } = options;
+
+                function updateValue(value) {
+                    const numericValue = parseFloat(value.toString().replace(',', '.'));
+                    if (isNaN(numericValue)) return;
+                    const steppedValue = Math.round(numericValue / step) * step;
+                    const clampedValue = Math.max(min, Math.min(max, steppedValue));
+                    const formattedValue = format ? format(clampedValue) : clampedValue.toString();
+                    if (display.value !== formattedValue) { display.value = formattedValue; }
+                    const percent = ((clampedValue - min) / (max - min)) * 100;
+                    thumb.style.left = `calc(${percent}% - ${percent * 0.28}px)`;
+                }
+
+                display.addEventListener('change', (e) => updateValue(e.target.value));
+                display.addEventListener('input', (e) => { 
+                    const numericValue = parseFloat(e.target.value.replace(',', '.'));
+                     if (!isNaN(numericValue)) {
+                      const clampedValue = Math.max(min, Math.min(max, numericValue));
+                      const percent = ((clampedValue - min) / (max - min)) * 100;
+                      thumb.style.left = `calc(${percent}% - ${percent * 0.28}px)`;
+                     }
+                });
+
+                function handleMove(clientX) { if (!isDragging) return; const rect = track.getBoundingClientRect(); const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)); const value = min + percent * (max - min); updateValue(value); }
+                
+                track.addEventListener('mousedown', (e) => { isDragging = true; handleMove(e.clientX); }); 
+                document.addEventListener('mousemove', (e) => handleMove(e.clientX)); 
+                document.addEventListener('mouseup', () => { isDragging = false; });
+                track.addEventListener('touchstart', (e) => { isDragging = true; handleMove(e.touches[0].clientX); }); 
+                document.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX)); 
+                document.addEventListener('touchend', () => { isDragging = false; });
+                
+                updateValue(initial);
+            }
+            
+            function renderGlucoseByPeriodChart(period) {
+                const ctx = document.getElementById('glucoseByPeriodChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const days = period === 'weekly' ? 7 : 30;
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+
+                const logs = appState.logHistory.filter(e => e.type === 'glucose' && new Date(e.timestamp) >= startDate);
+
+                const periods = { 'Madrugada (0-5)': [], 'Manhã (6-11)': [], 'Tarde (12-17)': [], 'Noite (18-23)': [] };
+                logs.forEach(log => {
+                    const hour = new Date(log.timestamp).getHours();
+                    if (hour <= 5) periods['Madrugada (0-5)'].push(log.rawData.value);
+                    else if (hour <= 11) periods['Manhã (6-11)'].push(log.rawData.value);
+                    else if (hour <= 17) periods['Tarde (12-17)'].push(log.rawData.value);
+                    else periods['Noite (18-23)'].push(log.rawData.value);
+                });
+
+                const data = Object.keys(periods).map(key => {
+                    const values = periods[key];
+                    return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+                });
+
+                activeCharts.glucoseByPeriod = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(periods),
+                        datasets: [{
+                            label: 'Glicemia Média',
+                            data: data,
+                            backgroundColor: ['#6366f1', '#f59e0b', '#ec4899', '#10b981'],
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            }
+
+            function renderHypoReport(period) {
+                const container = document.getElementById('hypo-events-list');
+                if (!container) return;
+
+                const days = period === 'weekly' ? 7 : 30;
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+
+                const hypoEvents = appState.logHistory.filter(e => e.type === 'glucose' && e.rawData.value < 70 && new Date(e.timestamp) >= startDate).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if (hypoEvents.length === 0) {
+                    container.innerHTML = '<p class="text-center">Nenhum evento de hipoglicemia registrado neste período.</p>';
+                    return;
+                }
+                
+                container.innerHTML = hypoEvents.map(log => `
+                    <div class="p-2 bg-red-500/10 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-red-500">${log.rawData.value} mg/dL</span>
+                            <span class="text-xs">${new Date(log.timestamp).toLocaleString('pt-BR')}</span>
+                        </div>
+                        ${log.rawData.notes ? `<p class="text-xs italic mt-1">Nota: ${log.rawData.notes}</p>` : ''}
+                    </div>
+                `).join('');
+            }
+
+        });
+    </script>
+</body>
+</html>
+
+
+
